@@ -1,5 +1,6 @@
 extern crate exitcode;
 mod dragonruby;
+mod init;
 mod install;
 mod new;
 mod run;
@@ -28,6 +29,10 @@ fn main() {
             (about: "Runs a DragonRuby project")
             (@arg PATH: "The path to your new project. Defaults to the current directory.")
         )
+        (@subcommand init =>
+            (about: "Initializes an existing project as a Smaug project.")
+            (@arg PATH: "The path to your new project. Defaults to the current directory.")
+        )
     )
     .get_matches();
 
@@ -38,6 +43,7 @@ fn main() {
         }
         Some("new") => new::new(&matches.subcommand_matches("new").unwrap()),
         Some("run") => run::run(&matches.subcommand_matches("run").unwrap()),
+        Some("init") => init::init(&matches.subcommand_matches("init").unwrap()),
         _ => unreachable!(),
     }
 }

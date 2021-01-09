@@ -1,0 +1,21 @@
+[project]
+name = "My Game"
+version = "0.1.0"
+author = "My Name"
+icon = "metadata/icon.png"
+
+# Uncomment the below to publish your game to https://itch.io
+# [itch]
+# # The Project URL you set when you created the game on Itch.io. https://my-username.itch.io/my-game.
+# url = "my-game"
+# # Your username on Itch.io.
+# username = "my-username"
+
+[[dependencies]]
+
+# Dependency Examples
+# draco = "https://github.com/guitsaru/draco.git"
+# branch = { repo = "https://github.com/guitsaru/draco.git", branch = "main" }
+# local = "../dependency/"
+# zipped = "../dependency.zip"
+# download = "https://example.com/download.zip"
