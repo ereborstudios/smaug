@@ -54,6 +54,8 @@ pub fn generate_metadata(project: &Path) {
   let config = ProjectConfig::load(config_path);
   let metadata_dir = project.join("metadata");
 
+  println!("{:?}", config);
+
   fs::create_dir_all(metadata_dir.as_path()).unwrap();
   let game_metadata = metadata_dir.join("game_metadata.txt");
 
