@@ -3,6 +3,7 @@ name = "My Game"
 version = "0.1.0"
 author = "My Name"
 icon = "metadata/icon.png"
+url = "https://example.com"
 
 # Uncomment the below to publish your game to https://itch.io
 # [itch]

@@ -8,6 +8,7 @@ pub struct ProjectConfig {
   pub project: Project,
   pub itch: Option<Itch>,
   pub dependencies: Vec<Dependency>,
+  pub files: Vec<File>,
 }
 
 #[derive(Debug)]
@@ -15,6 +16,7 @@ pub struct Project {
   pub author: Option<String>,
   pub icon: Option<String>,
   pub name: Option<String>,
+  pub url: Option<String>,
   pub version: Option<String>,
 }
 
@@ -31,6 +33,12 @@ pub struct Dependency {
   pub name: Option<String>,
   pub repo: Option<String>,
   pub url: Option<String>,
+}
+
+#[derive(Debug)]
+pub struct File {
+  pub from: String,
+  pub to: String,
 }
 
 impl ProjectConfig {
@@ -52,10 +60,13 @@ impl ProjectConfig {
       .and_then(load_dependencies)
       .unwrap_or(vec![]);
 
+    let files = config.get("files").and_then(load_files).unwrap_or(vec![]);
+
     ProjectConfig {
       project,
       itch,
       dependencies,
+      files,
     }
   }
 }
@@ -64,16 +75,19 @@ fn load_project(value: &Value) -> Option<Project> {
   let project = Project {
     author: value
       .get("author")
-      .and_then(|author| Some(String::from(author.as_str().unwrap()))),
+      .and_then(|val| Some(String::from(val.as_str().unwrap()))),
     icon: value
       .get("icon")
-      .and_then(|icon| Some(String::from(icon.as_str().unwrap()))),
+      .and_then(|val| Some(String::from(val.as_str().unwrap()))),
     name: value
       .get("name")
-      .and_then(|name| Some(String::from(name.as_str().unwrap()))),
+      .and_then(|val| Some(String::from(val.as_str().unwrap()))),
+    url: value
+      .get("url")
+      .and_then(|val| Some(String::from(val.as_str().unwrap()))),
     version: value
       .get("version")
-      .and_then(|version| Some(String::from(version.as_str().unwrap()))),
+      .and_then(|val| Some(String::from(val.as_str().unwrap()))),
   };
 
   return Some(project);
@@ -93,7 +107,7 @@ fn load_itch(value: &Value) -> Option<Itch> {
 }
 
 fn load_dependencies(value: &Value) -> Option<Vec<Dependency>> {
-  let dependencies = value.as_table().and_then(|dependencies| {
+  return value.as_table().and_then(|dependencies| {
     Some(
       dependencies
         .into_iter()
@@ -101,8 +115,6 @@ fn load_dependencies(value: &Value) -> Option<Vec<Dependency>> {
         .collect::<Vec<Dependency>>(),
     )
   });
-
-  return dependencies;
 }
 
 fn load_dependency((name, value): (&String, &Value)) -> Dependency {
@@ -120,5 +132,18 @@ fn load_dependency((name, value): (&String, &Value)) -> Dependency {
     url: value
       .get("url")
       .and_then(|val| Some(String::from(val.as_str().unwrap()))),
+  };
+}
+
+fn load_files(value: &Value) -> Option<Vec<File>> {
+  return value
+    .as_table()
+    .and_then(|files| Some(files.into_iter().map(load_file).collect::<Vec<File>>()));
+}
+
+fn load_file((from, to): (&String, &Value)) -> File {
+  return File {
+    from: from.clone(),
+    to: String::from(to.as_str().unwrap()),
   };
 }

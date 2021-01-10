@@ -1,13 +1,14 @@
 use crate::project_config::Dependency;
-use crate::smaug;
 use git2::build::CheckoutBuilder;
 use git2::build::RepoBuilder;
 use git2::FetchOptions;
 use std::fs;
+use std::path::PathBuf;
 
-pub fn clone(dependency: &Dependency) {
-  let destination = smaug::cache_dir().join(dependency.name.as_ref().unwrap());
-  fs::remove_dir_all(destination.clone()).unwrap();
+pub fn clone(dependency: &Dependency, destination: PathBuf) {
+  if destination.exists() {
+    fs::remove_dir_all(destination.clone()).unwrap();
+  }
 
   let fetch = FetchOptions::new();
   let checkout = CheckoutBuilder::new();

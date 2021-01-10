@@ -2,7 +2,6 @@ extern crate exitcode;
 mod commands;
 mod dragonruby;
 mod git;
-mod package_config;
 mod project_config;
 mod smaug;
 use clap::clap_app;
