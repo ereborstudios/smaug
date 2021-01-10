@@ -1,11 +1,8 @@
 extern crate exitcode;
+mod commands;
 mod dragonruby;
-mod init;
-mod install;
-mod new;
 mod project_config;
-mod run;
-mod uninstall;
+mod smaug;
 use clap::clap_app;
 
 fn main() {
@@ -45,18 +42,18 @@ fn main() {
         Some("dragonruby") => {
             let matches = matches.subcommand_matches("dragonruby").unwrap();
             match matches.subcommand_name() {
-                Some("install") => {
-                    install::install(&matches.subcommand_matches("install").unwrap())
-                }
-                Some("uninstall") => {
-                    uninstall::uninstall(&matches.subcommand_matches("uninstall").unwrap())
-                }
+                Some("install") => commands::dragonruby::install::call(
+                    &matches.subcommand_matches("install").unwrap(),
+                ),
+                Some("uninstall") => commands::dragonruby::uninstall::call(
+                    &matches.subcommand_matches("uninstall").unwrap(),
+                ),
                 _ => unreachable!(),
             }
         }
-        Some("new") => new::new(&matches.subcommand_matches("new").unwrap()),
-        Some("run") => run::run(&matches.subcommand_matches("run").unwrap()),
-        Some("init") => init::init(&matches.subcommand_matches("init").unwrap()),
+        Some("new") => commands::new::call(&matches.subcommand_matches("new").unwrap()),
+        Some("run") => commands::run::call(&matches.subcommand_matches("run").unwrap()),
+        Some("init") => commands::init::call(&matches.subcommand_matches("init").unwrap()),
         _ => unreachable!(),
     }
 }

@@ -5,7 +5,7 @@ use std::include_str;
 use std::path::Path;
 use std::process;
 
-pub fn init(matches: &&clap::ArgMatches) {
+pub fn call(matches: &&clap::ArgMatches) {
   dragonruby::ensure_installed();
 
   let current_directory = env::current_dir().unwrap();
@@ -27,7 +27,7 @@ pub fn init(matches: &&clap::ArgMatches) {
 }
 
 fn generate_config(path: &Path) {
-  let config = include_str!("../data/Smaug.toml");
+  let config = include_str!("../../data/Smaug.toml");
 
   fs::write(path, config).unwrap();
 }
