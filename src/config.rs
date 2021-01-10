@@ -29,28 +29,30 @@ pub struct Dependency {
   pub url: Option<String>,
 }
 
-pub fn load(path: PathBuf) -> Config {
-  let file = fs::read_to_string(path).unwrap();
-  let value = file.parse::<Value>();
+impl Config {
+  pub fn load(path: PathBuf) -> Config {
+    let file = fs::read_to_string(path).unwrap();
+    let value = file.parse::<Value>();
 
-  if value.is_err() {
-    println!("{}", value.unwrap_err());
-    process::exit(exitcode::DATAERR);
-  }
+    if value.is_err() {
+      println!("{}", value.unwrap_err());
+      process::exit(exitcode::DATAERR);
+    }
 
-  let config = value.unwrap();
+    let config = value.unwrap();
 
-  let project = config.get("project").and_then(load_project).unwrap();
-  let itch = config.get("itch").and_then(load_itch);
-  let dependencies = config
-    .get("dependencies")
-    .and_then(load_dependencies)
-    .unwrap();
+    let project = config.get("project").and_then(load_project).unwrap();
+    let itch = config.get("itch").and_then(load_itch);
+    let dependencies = config
+      .get("dependencies")
+      .and_then(load_dependencies)
+      .unwrap();
 
-  Config {
-    project,
-    itch,
-    dependencies,
+    Config {
+      project,
+      itch,
+      dependencies,
+    }
   }
 }
 
