@@ -152,17 +152,18 @@ fn load_dependency_string(name: &String, value: &str) -> Dependency {
   match path.extension().and_then(|str| str.to_str()) {
     Some("git") => repo = Some(String::from(value)),
     Some("zip") => {
-      if path.is_file() && zip_extensions::is_zip(&path.to_path_buf()) {
-        file = Some(String::from(value))
+      let expanded = shellexpand::full(path.to_str().unwrap()).unwrap();
+      let expanded = String::from(expanded.chars().as_str());
+      let expanded = Path::new(&expanded);
+      if expanded.is_file() && zip_extensions::is_zip(&expanded.to_path_buf()) {
+        file = Some(String::from(expanded.to_str().unwrap()));
+      } else if Url::parse(value).is_ok() {
+        url = Some(Url::parse(value).unwrap());
       }
     }
     _ => {
       if path.is_dir() {
         dir = Some(String::from(value));
-      }
-
-      if Url::parse(value).is_ok() {
-        url = Some(Url::parse(value).unwrap());
       }
     }
   }

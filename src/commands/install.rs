@@ -1,8 +1,10 @@
 use crate::dependency::Dependency;
 use crate::dragonruby;
+use crate::file;
 use crate::git;
 use crate::project_config::ProjectConfig;
 use crate::smaug;
+use crate::url;
 use std::env;
 use std::fs;
 use std::path::Path;
@@ -35,13 +37,21 @@ pub fn call(matches: &&clap::ArgMatches) {
         let source = dir.to_path_buf();
         copy_package(&source, &path, &mut index);
       }
-      None => {
-        println!("Malformed dependency: {}", dependency.name.unwrap());
-        process::exit(exitcode::DATAERR);
+      Some(Dependency::Url { location }) => {
+        let source = cache_dir.join(format!("{}.zip", dependency.name.as_ref().unwrap()));
+        let destination = cache_dir.join(dependency.name.as_ref().unwrap());
+        url::download(&location, &source);
+        file::unzip(&source, &destination);
+        copy_package(&destination, &path, &mut index);
       }
-      _ => {
-        println!("Not implemented yet: {:?}", dependency);
-        process::exit(exitcode::TEMPFAIL);
+      Some(Dependency::File { path: zip }) => {
+        let destination = cache_dir.join(dependency.name.as_ref().unwrap());
+        file::unzip(&zip, &destination);
+        copy_package(&destination, &path, &mut index);
+      }
+      None => {
+        println!("Malformed dependency: {:?}", dependency);
+        process::exit(exitcode::DATAERR);
       }
     }
   }

@@ -1,10 +1,14 @@
 extern crate exitcode;
+
 mod commands;
 mod dependency;
 mod dragonruby;
+mod file;
 mod git;
 mod project_config;
 mod smaug;
+mod url;
+
 use clap::clap_app;
 
 fn main() {
