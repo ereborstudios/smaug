@@ -1,4 +1,4 @@
-use crate::config::Config;
+use crate::project_config::ProjectConfig;
 use directories::ProjectDirs;
 use std::fs;
 use std::path::Path;
@@ -51,7 +51,7 @@ pub fn ensure_smaug_project(project: &Path) {
 
 pub fn generate_metadata(project: &Path) {
   let config_path = project.join("Smaug.toml");
-  let config = Config::load(config_path);
+  let config = ProjectConfig::load(config_path);
   let metadata_dir = project.join("metadata");
 
   fs::create_dir_all(metadata_dir.as_path()).unwrap();

@@ -1,9 +1,9 @@
 extern crate exitcode;
-mod config;
 mod dragonruby;
 mod init;
 mod install;
 mod new;
+mod project_config;
 mod run;
 mod uninstall;
 use clap::clap_app;
@@ -15,12 +15,16 @@ fn main() {
         (about: "Installs DragonRuby dependencies")
         (setting: clap::AppSettings::ArgRequiredElseHelp)
         (@arg verbose: -v --verbose "Displays more information")
-        (@subcommand install =>
-            (about: "Installs DragonRuby")
-            (@arg FILE: +required "The location of the DragonRuby Game Toolkit zip file")
-        )
-        (@subcommand uninstall =>
-            (about: "Uninstalls DragonRuby")
+        (@subcommand dragonruby =>
+            (about: "Manages your local DragonRuby installation.")
+            (setting: clap::AppSettings::ArgRequiredElseHelp)
+            (@subcommand install =>
+                (about: "Installs DragonRuby.")
+                (@arg FILE: +required "The location of the DragonRuby Game Toolkit zip file.")
+            )
+            (@subcommand uninstall =>
+                (about: "Uninstalls DragonRuby.")
+            )
         )
         (@subcommand new =>
             (about: "Start a new DragonRuby project")
@@ -38,9 +42,17 @@ fn main() {
     .get_matches();
 
     match matches.subcommand_name() {
-        Some("install") => install::install(&matches.subcommand_matches("install").unwrap()),
-        Some("uninstall") => {
-            uninstall::uninstall(&matches.subcommand_matches("uninstall").unwrap())
+        Some("dragonruby") => {
+            let matches = matches.subcommand_matches("dragonruby").unwrap();
+            match matches.subcommand_name() {
+                Some("install") => {
+                    install::install(&matches.subcommand_matches("install").unwrap())
+                }
+                Some("uninstall") => {
+                    uninstall::uninstall(&matches.subcommand_matches("uninstall").unwrap())
+                }
+                _ => unreachable!(),
+            }
         }
         Some("new") => new::new(&matches.subcommand_matches("new").unwrap()),
         Some("run") => run::run(&matches.subcommand_matches("run").unwrap()),
