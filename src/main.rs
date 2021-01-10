@@ -1,5 +1,6 @@
 extern crate exitcode;
 mod commands;
+mod dependency;
 mod dragonruby;
 mod git;
 mod project_config;

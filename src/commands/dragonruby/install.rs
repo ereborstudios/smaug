@@ -1,9 +1,9 @@
 use crate::dragonruby;
 use std::fs;
-use std::io;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process;
+use zip_extensions::zip_extract;
 
 pub fn call(matches: &&clap::ArgMatches) {
   let filename: &str = matches.value_of("FILE").unwrap();
@@ -40,52 +40,7 @@ fn setup_destination() -> PathBuf {
 }
 
 fn extract(source: &Path, destination: &Path) {
-  let file = fs::File::open(&source).unwrap();
+  println!("Installing DragonRuby from {}", source.to_str().unwrap());
 
-  let mut archive = zip::ZipArchive::new(file).unwrap();
-
-  println!("Installing DragonRuby");
-
-  for i in 0..archive.len() {
-    let mut file = archive.by_index(i).unwrap();
-    let outpath = match file.enclosed_name() {
-      Some(path) => destination.join(path).to_owned(),
-      None => continue,
-    };
-
-    {
-      let comment = file.comment();
-      if !comment.is_empty() {
-        println!("File {} comment: {}", i, comment);
-      }
-    }
-
-    if (&*file.name()).ends_with('/') {
-      fs::create_dir_all(&outpath).unwrap();
-    } else {
-      if let Some(p) = outpath.parent() {
-        if !p.exists() {
-          fs::create_dir_all(&p).unwrap();
-        }
-      }
-      let mut outfile = fs::File::create(&outpath).unwrap();
-      io::copy(&mut file, &mut outfile).unwrap();
-    }
-
-    // Get and Set permissions
-    #[cfg(unix)]
-    {
-      use std::os::unix::fs::PermissionsExt;
-
-      if let Some(mode) = file.unix_mode() {
-        fs::set_permissions(&outpath, fs::Permissions::from_mode(mode)).unwrap();
-      }
-    }
-  }
-
-  println!(
-    "Extracting from {} to {}",
-    source.to_str().unwrap(),
-    destination.to_str().unwrap()
-  );
+  zip_extract(&source.to_path_buf(), &destination.to_path_buf()).unwrap();
 }

@@ -1,3 +1,4 @@
+use crate::dependency::Dependency;
 use crate::dragonruby;
 use crate::git;
 use crate::project_config::ProjectConfig;
@@ -5,6 +6,7 @@ use crate::smaug;
 use std::env;
 use std::fs;
 use std::path::Path;
+use std::process;
 
 pub fn call(matches: &&clap::ArgMatches) {
   let current_directory = env::current_dir().unwrap();
@@ -17,18 +19,35 @@ pub fn call(matches: &&clap::ArgMatches) {
   let config = ProjectConfig::load(path.clone().join("Smaug.toml"));
 
   for dependency in config.dependencies {
-    let destination = smaug::cache_dir().join(dependency.name.as_ref().unwrap());
+    let cache_dir = smaug::cache_dir();
 
-    if dependency.repo.is_some() {
-      git::clone(&dependency, destination.clone());
+    match Dependency::from_config(&dependency) {
+      Some(Dependency::Git { repo, branch }) => {
+        let clone = git::Clone { repo, branch };
+        let destination = cache_dir.join(dependency.name.as_ref().unwrap());
+        clone.clone(&destination);
+        let source = destination.clone();
+        copy_package(&source, &path);
+      }
+      Some(Dependency::Dir { path: dir }) => {
+        let source = dir.to_path_buf();
+        copy_package(&source, &path);
+      }
+      None => {
+        println!("Malformed dependency: {}", dependency.name.unwrap());
+        process::exit(exitcode::DATAERR);
+      }
+      _ => {
+        println!("Not implemented yet: {:?}", dependency);
+        process::exit(exitcode::TEMPFAIL);
+      }
     }
-
-    copy_package(destination.clone().as_path(), &path);
   }
 }
 
 fn copy_package(package: &Path, project: &Path) {
   let package_project = ProjectConfig::load(package.join("Smaug.toml"));
+  println!("{:?}", package_project);
 
   for file in package_project.files {
     let source = package.join(file.from);

@@ -1,7 +1,9 @@
 use std::fs;
+use std::path::Path;
 use std::path::PathBuf;
 use std::process;
 use toml::Value;
+use url::Url;
 
 #[derive(Debug)]
 pub struct ProjectConfig {
@@ -32,7 +34,8 @@ pub struct Dependency {
   pub dir: Option<String>,
   pub name: Option<String>,
   pub repo: Option<String>,
-  pub url: Option<String>,
+  pub url: Option<Url>,
+  pub file: Option<String>,
 }
 
 #[derive(Debug)]
@@ -43,10 +46,21 @@ pub struct File {
 
 impl ProjectConfig {
   pub fn load(path: PathBuf) -> ProjectConfig {
-    let file = fs::read_to_string(path).unwrap();
+    let raw = fs::read_to_string(path.clone());
+
+    if raw.is_err() {
+      println!(
+        "Could not find configuration at {}.",
+        path.to_str().unwrap()
+      );
+      process::exit(exitcode::DATAERR);
+    }
+
+    let file = raw.unwrap();
     let value = file.parse::<Value>();
 
     if value.is_err() {
+      println!("Error parsing {}.", path.to_str().unwrap());
       println!("{}", value.unwrap_err());
       process::exit(exitcode::DATAERR);
     }
@@ -118,6 +132,52 @@ fn load_dependencies(value: &Value) -> Option<Vec<Dependency>> {
 }
 
 fn load_dependency((name, value): (&String, &Value)) -> Dependency {
+  match value {
+    Value::Table(..) => return load_dependency_table(name, value),
+    Value::String(..) => return load_dependency_string(name, value.as_str().unwrap()),
+    _ => {
+      println!("Malformed dependency with name {}", name);
+      process::exit(exitcode::DATAERR);
+    }
+  }
+}
+
+fn load_dependency_string(name: &String, value: &str) -> Dependency {
+  let path = Path::new(value);
+  let mut dir: Option<String> = None;
+  let mut repo: Option<String> = None;
+  let mut file: Option<String> = None;
+  let mut url: Option<Url> = None;
+
+  match path.extension().and_then(|str| str.to_str()) {
+    Some("git") => repo = Some(String::from(value)),
+    Some("zip") => {
+      if path.is_file() && zip_extensions::is_zip(&path.to_path_buf()) {
+        file = Some(String::from(value))
+      }
+    }
+    _ => {
+      if path.is_dir() {
+        dir = Some(String::from(value));
+      }
+
+      if Url::parse(value).is_ok() {
+        url = Some(Url::parse(value).unwrap());
+      }
+    }
+  }
+
+  return Dependency {
+    name: Some(String::from(name)),
+    branch: None,
+    dir: dir,
+    file: file,
+    repo: repo,
+    url: url,
+  };
+}
+
+fn load_dependency_table(name: &String, value: &Value) -> Dependency {
   return Dependency {
     name: Some(name.clone()),
     branch: value
@@ -126,12 +186,15 @@ fn load_dependency((name, value): (&String, &Value)) -> Dependency {
     dir: value
       .get("dir")
       .and_then(|val| Some(String::from(val.as_str().unwrap()))),
+    file: value
+      .get("file")
+      .and_then(|val| Some(String::from(val.as_str().unwrap()))),
     repo: value
       .get("repo")
       .and_then(|val| Some(String::from(val.as_str().unwrap()))),
     url: value
       .get("url")
-      .and_then(|val| Some(String::from(val.as_str().unwrap()))),
+      .and_then(|val| Some(Url::parse(val.as_str().unwrap()).unwrap())),
   };
 }
 

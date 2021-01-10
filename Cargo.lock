@@ -500,8 +500,10 @@ dependencies = [
  "exitcode",
  "git2",
  "toml",
+ "url",
  "walkdir",
  "zip",
+ "zip-extensions",
 ]
 
 [[package]]
@@ -727,4 +729,13 @@ dependencies = [
  "flate2",
  "thiserror",
  "time",
+]
+
+[[package]]
+name = "zip-extensions"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6b9397aa85b738c68f94ca15ee7168a8d46c664e408f2a456d623f7a55384891"
+dependencies = [
+ "zip",
 ]

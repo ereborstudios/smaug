@@ -12,5 +12,7 @@ directories = "3.0.1"
 exitcode = "1.1.2"
 git2 = "0.13"
 toml = {version = "0.5.3", features = ["preserve_order"]}
+url = "2.2.0"
 walkdir = "2"
 zip = "0.5"
+zip-extensions = "0.6.0"
