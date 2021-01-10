@@ -1,5 +1,5 @@
-use crate::config::Config;
-use directories::ProjectDirs;
+use crate::project_config::ProjectConfig;
+use crate::smaug;
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
@@ -16,19 +16,8 @@ pub fn dragonruby_platform() -> &'static str {
 }
 
 pub fn dragonruby_directory() -> PathBuf {
-  let destination: &Path;
   let directory_name = format!("dragonruby-{}", dragonruby_platform());
-  let project_dirs = ProjectDirs::from("org", "Erebor Studios", "Smaug");
-
-  match project_dirs {
-    Some(ref dirs) => {
-      destination = dirs.data_dir();
-    }
-    None => {
-      println!("No data directories found");
-      process::exit(exitcode::OSFILE);
-    }
-  }
+  let destination = smaug::data_dir();
 
   return destination.join(directory_name);
 }
@@ -51,8 +40,10 @@ pub fn ensure_smaug_project(project: &Path) {
 
 pub fn generate_metadata(project: &Path) {
   let config_path = project.join("Smaug.toml");
-  let config = Config::load(config_path);
+  let config = ProjectConfig::load(config_path);
   let metadata_dir = project.join("metadata");
+
+  println!("{:?}", config);
 
   fs::create_dir_all(metadata_dir.as_path()).unwrap();
   let game_metadata = metadata_dir.join("game_metadata.txt");

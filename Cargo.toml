@@ -10,6 +10,11 @@ edition = "2018"
 clap = "3.0.0-beta.2"
 directories = "3.0.1"
 exitcode = "1.1.2"
-toml = "0.5.3"
+git2 = "0.13"
+reqwest = { version = "0.11", features = ["blocking"] }
+shellexpand = "2.1"
+toml = {version = "0.5.3", features = ["preserve_order"]}
+url = "2.2.0"
 walkdir = "2"
 zip = "0.5"
+zip-extensions = "0.6.0"

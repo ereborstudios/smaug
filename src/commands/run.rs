@@ -3,7 +3,7 @@ use std::env;
 use std::path::Path;
 use std::process;
 
-pub fn run(matches: &&clap::ArgMatches) {
+pub fn call(matches: &&clap::ArgMatches) {
   dragonruby::ensure_installed();
 
   let current_directory = env::current_dir().unwrap();
