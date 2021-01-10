@@ -1,4 +1,5 @@
 extern crate exitcode;
+mod config;
 mod dragonruby;
 mod init;
 mod install;

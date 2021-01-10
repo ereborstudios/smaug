@@ -11,6 +11,10 @@ pub fn run(matches: &&clap::ArgMatches) {
     .value_of("PATH")
     .unwrap_or(current_directory.to_str().unwrap());
   let path = Path::new(filename);
+
+  dragonruby::ensure_smaug_project(path);
+  dragonruby::generate_metadata(path);
+
   let bin_dir = dragonruby::dragonruby_directory();
   let bin = bin_dir.join("dragonruby");
 
