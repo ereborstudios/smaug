@@ -54,7 +54,7 @@ pub fn call(matches: &clap::ArgMatches) {
                 copy_package(&destination, &path, &mut index);
             }
             None => {
-                println!("Malformed dependency: {:?}", dependency);
+                smaug::print_error(format!("Malformed dependency: {:?}", dependency));
                 process::exit(exitcode::DATAERR);
             }
         }

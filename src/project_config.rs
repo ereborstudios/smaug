@@ -61,8 +61,8 @@ impl ProjectConfig {
         let value = file.parse::<Value>();
 
         if value.is_err() {
-            println!("Error parsing {}.", path.to_str().unwrap());
-            println!("{}", value.unwrap_err());
+            smaug::print_error(format!("Error parsing {}.", path.to_str().unwrap()));
+            smaug::print_error(format!("{}", value.unwrap_err()));
             process::exit(exitcode::DATAERR);
         }
 
@@ -137,7 +137,7 @@ fn load_dependency((name, value): (&String, &Value)) -> Dependency {
         Value::Table(..) => return load_dependency_table(name, value),
         Value::String(..) => return load_dependency_string(name, value.as_str().unwrap()),
         _ => {
-            println!("Malformed dependency with name {}", name);
+            smaug::print_error(format!("Malformed dependency with name {}", name));
             process::exit(exitcode::DATAERR);
         }
     }
