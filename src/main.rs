@@ -38,7 +38,11 @@ fn main() {
         )
         (@subcommand init =>
             (about: "Initializes an existing project as a Smaug project.")
-            (@arg PATH: "The path to your new project. Defaults to the current directory.")
+            (@arg PATH: "The path to your project. Defaults to the current directory.")
+        )
+        (@subcommand package =>
+            (about: "Initializes an existing library as a Smaug package.")
+            (@arg PATH: "The path to your package. Defaults to the current directory.")
         )
         (@subcommand run =>
             (about: "Runs a DragonRuby project")
@@ -68,6 +72,7 @@ fn main() {
         Some("new") => commands::new::call(matches.subcommand_matches("new").unwrap()),
         Some("run") => commands::run::call(matches.subcommand_matches("run").unwrap()),
         Some("init") => commands::init::call(matches.subcommand_matches("init").unwrap()),
+        Some("package") => commands::package::call(matches.subcommand_matches("package").unwrap()),
         Some("install") => commands::install::call(matches.subcommand_matches("install").unwrap()),
         _ => unreachable!(),
     }
