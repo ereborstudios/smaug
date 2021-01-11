@@ -1,5 +1,6 @@
 use crate::project_config::ProjectConfig;
 use crate::smaug;
+use log::*;
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
@@ -23,28 +24,41 @@ pub fn dragonruby_directory() -> PathBuf {
 }
 
 pub fn ensure_installed() {
+  debug!(
+    "Looking for DragonRuby directory at {}",
+    dragonruby_directory().to_str().unwrap()
+  );
   if !dragonruby_directory().exists() {
-    println!("Install DragonRuby with \"smaug install PATH_TO_DRAGONRUBY_ZIP\"");
+    smaug::print_error("Install DragonRuby with \"smaug install PATH_TO_DRAGONRUBY_ZIP\"");
     process::exit(exitcode::UNAVAILABLE);
   }
 }
 
 pub fn ensure_smaug_project(project: &Path) {
-  let config_path = project.join("metadata/game_metadata.txt");
+  let config_path = project.join("Smaug.toml");
+  debug!(
+    "Looking for Smaug Configuration at {}",
+    config_path.to_str().unwrap()
+  );
 
   if !config_path.exists() {
-    println!("This is not a Smaug project. Initialize one with \"smaug init .\".");
+    smaug::print_error("This is not a Smaug project. Initialize one with \"smaug init\".");
     process::exit(exitcode::CONFIG);
   }
 }
 
 pub fn generate_metadata(project: &Path) {
+  trace!("Generating Metadata");
   let config_path = project.join("Smaug.toml");
+  trace!(
+    "Loading Smaug Configuration from {}",
+    config_path.to_str().unwrap()
+  );
   let config = ProjectConfig::load(config_path);
+  debug!("Smaug Configuration: {:?}", config);
   let metadata_dir = project.join("metadata");
 
-  println!("{:?}", config);
-
+  trace!("Creating Directory: {}", metadata_dir.to_str().unwrap());
   fs::create_dir_all(metadata_dir.as_path()).unwrap();
   let game_metadata = metadata_dir.join("game_metadata.txt");
 
@@ -107,5 +121,6 @@ pub fn generate_metadata(project: &Path) {
     metadata.push_str(url_line.as_str());
   }
 
+  trace!("Writing metadata to {}", game_metadata.to_str().unwrap());
   fs::write(game_metadata, metadata).unwrap();
 }

@@ -17,7 +17,10 @@ fn main() {
         (author: "Matt Pruitt <matt@guitsaru.com>")
         (about: "Installs DragonRuby dependencies")
         (setting: clap::AppSettings::ArgRequiredElseHelp)
-        (@arg verbose: -v --verbose "Displays more information")
+
+        (@arg verbose: -v... --verbose... +global takes_value(false) "Displays more information")
+        (@arg quiet: -q --quiet +global takes_value(false) "Silence all output")
+
         (@subcommand dragonruby =>
             (about: "Manages your local DragonRuby installation.")
             (setting: clap::AppSettings::ArgRequiredElseHelp)
@@ -47,24 +50,39 @@ fn main() {
         )
     )
     .get_matches();
+    start_log(&matches);
 
     match matches.subcommand_name() {
         Some("dragonruby") => {
             let matches = matches.subcommand_matches("dragonruby").unwrap();
             match matches.subcommand_name() {
                 Some("install") => commands::dragonruby::install::call(
-                    &matches.subcommand_matches("install").unwrap(),
+                    matches.subcommand_matches("install").unwrap(),
                 ),
                 Some("uninstall") => commands::dragonruby::uninstall::call(
-                    &matches.subcommand_matches("uninstall").unwrap(),
+                    matches.subcommand_matches("uninstall").unwrap(),
                 ),
                 _ => unreachable!(),
             }
         }
-        Some("new") => commands::new::call(&matches.subcommand_matches("new").unwrap()),
-        Some("run") => commands::run::call(&matches.subcommand_matches("run").unwrap()),
-        Some("init") => commands::init::call(&matches.subcommand_matches("init").unwrap()),
-        Some("install") => commands::install::call(&matches.subcommand_matches("install").unwrap()),
+        Some("new") => commands::new::call(matches.subcommand_matches("new").unwrap()),
+        Some("run") => commands::run::call(matches.subcommand_matches("run").unwrap()),
+        Some("init") => commands::init::call(matches.subcommand_matches("init").unwrap()),
+        Some("install") => commands::install::call(matches.subcommand_matches("install").unwrap()),
         _ => unreachable!(),
     }
+}
+
+fn start_log(matches: &clap::ArgMatches) {
+    let quiet = matches.is_present("quiet");
+    let verbosity = matches.occurrences_of("verbose") as usize;
+
+    stderrlog::new()
+        .module(module_path!())
+        .quiet(quiet)
+        .verbosity(verbosity + 2)
+        .timestamp(stderrlog::Timestamp::Off)
+        .show_level(false)
+        .init()
+        .unwrap();
 }
