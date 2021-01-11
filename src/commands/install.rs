@@ -12,91 +12,91 @@ use std::path::Path;
 use std::process;
 
 pub fn call(matches: &clap::ArgMatches) {
-  let current_directory = env::current_dir().unwrap();
-  let filename: &str = matches
-    .value_of("PATH")
-    .unwrap_or(current_directory.to_str().unwrap());
-  let path = Path::new(filename);
-  debug!("Project Path: {}", path.to_str().unwrap());
+    let current_directory = env::current_dir().unwrap();
+    let filename: &str = matches
+        .value_of("PATH")
+        .unwrap_or(current_directory.to_str().unwrap());
+    let path = Path::new(filename);
+    debug!("Project Path: {}", path.to_str().unwrap());
 
-  dragonruby::ensure_smaug_project(path);
-  let config = ProjectConfig::load(path.clone().join("Smaug.toml"));
-  debug!("Smaug Configuration: {:?}", config);
+    dragonruby::ensure_smaug_project(path);
+    let config = ProjectConfig::load(path.clone().join("Smaug.toml"));
+    debug!("Smaug Configuration: {:?}", config);
 
-  let mut index = start_index();
+    let mut index = start_index();
 
-  for dependency in config.dependencies {
-    let cache_dir = smaug::cache_dir();
-    debug!("Cache directory {}", cache_dir.to_str().unwrap());
+    for dependency in config.dependencies {
+        let cache_dir = smaug::cache_dir();
+        debug!("Cache directory {}", cache_dir.to_str().unwrap());
 
-    match Dependency::from_config(&dependency) {
-      Some(Dependency::Git { repo, branch }) => {
-        let clone = git::Clone { repo, branch };
-        let destination = cache_dir.join(dependency.name.as_ref().unwrap());
-        clone.clone(&destination);
-        let source = destination.clone();
-        copy_package(&source, &path, &mut index);
-      }
-      Some(Dependency::Dir { path: dir }) => {
-        let source = dir.to_path_buf();
-        copy_package(&source, &path, &mut index);
-      }
-      Some(Dependency::Url { location }) => {
-        let source = cache_dir.join(format!("{}.zip", dependency.name.as_ref().unwrap()));
-        let destination = cache_dir.join(dependency.name.as_ref().unwrap());
-        url::download(&location, &source);
-        file::unzip(&source, &destination);
-        copy_package(&destination, &path, &mut index);
-      }
-      Some(Dependency::File { path: zip }) => {
-        let destination = cache_dir.join(dependency.name.as_ref().unwrap());
-        file::unzip(&zip, &destination);
-        copy_package(&destination, &path, &mut index);
-      }
-      None => {
-        println!("Malformed dependency: {:?}", dependency);
-        process::exit(exitcode::DATAERR);
-      }
+        match Dependency::from_config(&dependency) {
+            Some(Dependency::Git { repo, branch }) => {
+                let clone = git::Clone { repo, branch };
+                let destination = cache_dir.join(dependency.name.as_ref().unwrap());
+                clone.clone(&destination);
+                let source = destination.clone();
+                copy_package(&source, &path, &mut index);
+            }
+            Some(Dependency::Dir { path: dir }) => {
+                let source = dir.to_path_buf();
+                copy_package(&source, &path, &mut index);
+            }
+            Some(Dependency::Url { location }) => {
+                let source = cache_dir.join(format!("{}.zip", dependency.name.as_ref().unwrap()));
+                let destination = cache_dir.join(dependency.name.as_ref().unwrap());
+                url::download(&location, &source);
+                file::unzip(&source, &destination);
+                copy_package(&destination, &path, &mut index);
+            }
+            Some(Dependency::File { path: zip }) => {
+                let destination = cache_dir.join(dependency.name.as_ref().unwrap());
+                file::unzip(&zip, &destination);
+                copy_package(&destination, &path, &mut index);
+            }
+            None => {
+                println!("Malformed dependency: {:?}", dependency);
+                process::exit(exitcode::DATAERR);
+            }
+        }
     }
-  }
 
-  debug!("Writing require file to {}", path.to_str().unwrap());
-  write_index(&index, &path);
+    debug!("Writing require file to {}", path.to_str().unwrap());
+    write_index(&index, &path);
 }
 
 fn copy_package(package: &Path, project: &Path, index: &mut String) {
-  let package_project = ProjectConfig::load(package.join("Smaug.toml"));
-  debug!("Package Config: {:?}", package_project);
+    let package_project = ProjectConfig::load(package.join("Smaug.toml"));
+    debug!("Package Config: {:?}", package_project);
 
-  for file in package_project.files {
-    let source = package.join(file.from.clone());
-    let destination = project.join(file.to.clone());
+    for file in package_project.files {
+        let source = package.join(file.from.clone());
+        let destination = project.join(file.to.clone());
 
-    trace!(
-      "Creating directory {}",
-      destination.parent().and_then(|p| p.to_str()).unwrap()
-    );
-    fs::create_dir_all(destination.parent().unwrap()).unwrap();
-    trace!(
-      "Copying file from {} to {}",
-      source.to_str().unwrap(),
-      destination.to_str().unwrap()
-    );
-    fs::copy(source, destination).unwrap();
-    index.push_str(format!("require \"{}\"\n", file.to.clone()).as_str());
-  }
+        trace!(
+            "Creating directory {}",
+            destination.parent().and_then(|p| p.to_str()).unwrap()
+        );
+        fs::create_dir_all(destination.parent().unwrap()).unwrap();
+        trace!(
+            "Copying file from {} to {}",
+            source.to_str().unwrap(),
+            destination.to_str().unwrap()
+        );
+        fs::copy(source, destination).unwrap();
+        index.push_str(format!("require \"{}\"\n", file.to.clone()).as_str());
+    }
 }
 
 fn start_index() -> String {
-  let mut output = String::new();
-  output.push_str("# This file is automatically @generated by Smaug.\n");
-  output.push_str("# Do not edit it manually.\n\n");
+    let mut output = String::new();
+    output.push_str("# This file is automatically @generated by Smaug.\n");
+    output.push_str("# Do not edit it manually.\n\n");
 
-  return output;
+    return output;
 }
 
 fn write_index(index: &String, dir: &Path) {
-  let destination = dir.join("app/smaug.rb");
-  fs::write(destination, index).unwrap();
-  info!("Add `require \"app/smaug.rb\"` to the top of your `main.rb` file.");
+    let destination = dir.join("app/smaug.rb");
+    fs::write(destination, index).unwrap();
+    info!("Add `require \"app/smaug.rb\"` to the top of your `main.rb` file.");
 }
