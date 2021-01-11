@@ -10,7 +10,7 @@ use std::fs;
 use std::path::Path;
 use std::process;
 
-pub fn call(matches: &&clap::ArgMatches) {
+pub fn call(matches: &clap::ArgMatches) {
   let current_directory = env::current_dir().unwrap();
   let filename: &str = matches
     .value_of("PATH")

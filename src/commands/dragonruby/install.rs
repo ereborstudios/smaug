@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use std::process;
 use zip_extensions::zip_extract;
 
-pub fn call(matches: &&clap::ArgMatches) {
+pub fn call(matches: &clap::ArgMatches) {
   let filename: &str = matches.value_of("FILE").unwrap();
   let path = Path::new(filename);
   let destination: PathBuf;

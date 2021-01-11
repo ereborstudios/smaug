@@ -5,7 +5,7 @@ use std::include_str;
 use std::path::Path;
 use std::process;
 
-pub fn call(matches: &&clap::ArgMatches) {
+pub fn call(matches: &clap::ArgMatches) {
   dragonruby::ensure_installed();
 
   let current_directory = env::current_dir().unwrap();

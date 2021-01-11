@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use std::process;
 use walkdir::WalkDir;
 
-pub fn call(matches: &&clap::ArgMatches) {
+pub fn call(matches: &clap::ArgMatches) {
   dragonruby::ensure_installed();
 
   let path = matches.value_of("PATH").unwrap();
