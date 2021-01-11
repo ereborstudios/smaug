@@ -1,4 +1,5 @@
 use crate::dragonruby;
+use log::*;
 use std::env;
 use std::fs;
 use std::include_str;
@@ -12,11 +13,13 @@ pub fn call(matches: &clap::ArgMatches) {
   let directory: &str = matches
     .value_of("PATH")
     .unwrap_or(current_directory.to_str().unwrap());
+  debug!("Directory: {}", directory);
   let pathbuf = Path::new(directory).join("Smaug.toml");
   let path = pathbuf.as_path();
+  debug!("Smaug Configuration: {}", path.to_str().unwrap());
 
   if path.exists() {
-    println!(
+    error!(
       "{} is already a Smaug project.",
       path.parent().unwrap().display()
     );
@@ -29,5 +32,6 @@ pub fn call(matches: &clap::ArgMatches) {
 fn generate_config(path: &Path) {
   let config = include_str!("../../data/Smaug.toml");
 
+  trace!("Writing Smaug configuration to {}", path.to_str().unwrap());
   fs::write(path, config).unwrap();
 }

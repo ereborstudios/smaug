@@ -22,7 +22,7 @@ pub fn call(matches: &clap::ArgMatches) {
   let bin = bin_dir.join("dragonruby");
 
   trace!(
-    "Running {} {}",
+    "Spawning Process {} {}",
     bin.to_str().unwrap(),
     path.to_str().unwrap()
   );
