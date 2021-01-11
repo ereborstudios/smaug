@@ -30,7 +30,7 @@ pub fn call(matches: &clap::ArgMatches) {
   generate_config(&path);
 }
 
-fn generate_config(path: &Path) {
+pub fn generate_config(path: &Path) {
   let config = include_str!("../../data/Smaug.toml");
 
   trace!("Writing Smaug configuration to {}", path.to_str().unwrap());

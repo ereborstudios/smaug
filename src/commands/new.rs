@@ -1,3 +1,4 @@
+use crate::commands::init;
 use crate::dragonruby;
 use crate::smaug;
 use log::*;
@@ -25,6 +26,8 @@ pub fn call(matches: &clap::ArgMatches) {
   let template = dragonruby::dragonruby_directory().join("mygame");
   debug!("Template Directory: {}", template.to_str().unwrap());
   copy_directory(template, destination.to_path_buf());
+
+  init::generate_config(&destination.join("Smaug.toml").as_path());
 }
 
 fn copy_directory(source: PathBuf, destination: PathBuf) {
