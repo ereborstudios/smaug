@@ -3,9 +3,9 @@ use log::*;
 use std::path::PathBuf;
 use std::process;
 
-pub fn print_error(message: &str) {
+pub fn print_error<S: Into<String>>(message: S) {
   info!("");
-  error!("{}", message);
+  error!("{}", message.into());
   info!("");
   info!("Thanks for using Smaug!");
   info!("🦗 Find a bug? File an issue: https://github.com/guitsaru/smaug/issues");
