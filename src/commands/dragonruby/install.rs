@@ -1,4 +1,5 @@
 use crate::dragonruby;
+use crate::smaug;
 use log::*;
 use std::fs;
 use std::path::Path;
@@ -17,7 +18,10 @@ pub fn call(matches: &clap::ArgMatches) {
     debug!("Project Path: {}", destination.to_str().unwrap());
     extract(path, &destination);
   } else {
-    error!("The file {} does not exist", path.to_str().unwrap());
+    smaug::print_error(format!(
+      "The file {} does not exist",
+      path.to_str().unwrap()
+    ));
     process::exit(exitcode::NOINPUT);
   }
 }
@@ -33,11 +37,11 @@ fn setup_destination() -> PathBuf {
   match result {
     Ok(()) => return destination.to_path_buf(),
     Err(error) => {
-      error!(
+      smaug::print_error(format!(
         "Could not create directory at {}\n{}",
         destination.to_str().unwrap(),
         error
-      );
+      ));
       process::exit(exitcode::DATAERR);
     }
   }

@@ -1,6 +1,18 @@
 use directories::ProjectDirs;
+use log::*;
 use std::path::PathBuf;
 use std::process;
+
+pub fn print_error(message: &str) {
+  info!("");
+  error!("{}", message);
+  info!("");
+  info!("Thanks for using Smaug!");
+  info!("🦗 Find a bug? File an issue: https://github.com/guitsaru/smaug/issues");
+  info!("🙋 Have a question? Start a discussion: https://github.com/guitsaru/smaug/discussions");
+  info!("💬 Want to chat? Join us on Discord: https://discord.gg/3MEsGjxZ");
+  info!("");
+}
 
 pub fn data_dir() -> PathBuf {
   return project_dirs().data_dir().to_path_buf();
@@ -16,7 +28,7 @@ fn project_dirs() -> ProjectDirs {
   match project_dirs {
     Some(dirs) => return dirs,
     None => {
-      println!("No project directories found");
+      print_error("No project directories found");
       process::exit(exitcode::OSFILE);
     }
   }

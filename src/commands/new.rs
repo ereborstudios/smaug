@@ -1,4 +1,5 @@
 use crate::dragonruby;
+use crate::smaug;
 use log::*;
 use std::fs;
 use std::path::Path;
@@ -14,7 +15,7 @@ pub fn call(matches: &clap::ArgMatches) {
   debug!("Project path: {}", destination.to_str().unwrap());
 
   if destination.exists() {
-    error!("{} already exists", path);
+    smaug::print_error(format!("{} already exists", path));
     process::exit(exitcode::DATAERR);
   }
 

@@ -1,4 +1,5 @@
 use crate::dragonruby;
+use crate::smaug;
 use log::*;
 use std::env;
 use std::fs;
@@ -19,10 +20,10 @@ pub fn call(matches: &clap::ArgMatches) {
   debug!("Smaug Configuration: {}", path.to_str().unwrap());
 
   if path.exists() {
-    error!(
+    smaug::print_error(format!(
       "{} is already a Smaug project.",
-      path.parent().unwrap().display()
-    );
+      path.parent().unwrap().display(),
+    ));
     process::exit(exitcode::USAGE);
   }
 

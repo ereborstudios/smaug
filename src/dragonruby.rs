@@ -29,7 +29,7 @@ pub fn ensure_installed() {
     dragonruby_directory().to_str().unwrap()
   );
   if !dragonruby_directory().exists() {
-    error!("Install DragonRuby with \"smaug install PATH_TO_DRAGONRUBY_ZIP\"");
+    smaug::print_error("Install DragonRuby with \"smaug install PATH_TO_DRAGONRUBY_ZIP\"");
     process::exit(exitcode::UNAVAILABLE);
   }
 }
@@ -42,7 +42,7 @@ pub fn ensure_smaug_project(project: &Path) {
   );
 
   if !config_path.exists() {
-    error!("This is not a Smaug project. Initialize one with \"smaug init .\".");
+    smaug::print_error("This is not a Smaug project. Initialize one with \"smaug init\".");
     process::exit(exitcode::CONFIG);
   }
 }
