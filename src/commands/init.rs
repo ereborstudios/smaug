@@ -13,7 +13,7 @@ pub fn call(matches: &clap::ArgMatches) {
     let current_directory = env::current_dir().unwrap();
     let directory: &str = matches
         .value_of("PATH")
-        .unwrap_or(current_directory.to_str().unwrap());
+        .unwrap_or_else(|| current_directory.to_str().unwrap());
     debug!("Directory: {}", directory);
     let pathbuf = Path::new(directory).join("Smaug.toml");
     let path = pathbuf.as_path();

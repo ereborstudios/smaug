@@ -13,14 +13,14 @@ pub fn dragonruby_platform() -> &'static str {
     #[cfg(target_os = "macos")]
     return "macos";
 
-    return "linux-amd64";
+    "linux-amd64"
 }
 
 pub fn dragonruby_directory() -> PathBuf {
     let directory_name = format!("dragonruby-{}", dragonruby_platform());
     let destination = smaug::data_dir();
 
-    return destination.join(directory_name);
+    destination.join(directory_name)
 }
 
 pub fn ensure_installed() {
@@ -69,7 +69,7 @@ pub fn generate_metadata(project: &Path) {
     let author_line = config
         .project
         .author
-        .and_then(|author| Some(format!("devtitle={}\n", author)))
+        .map(|author| format!("devtitle={}\n", author))
         .or_else(|| Some(String::from("#devtitle=My Name\n")))
         .unwrap();
 
@@ -78,7 +78,7 @@ pub fn generate_metadata(project: &Path) {
     let icon_line = config
         .project
         .icon
-        .and_then(|icon| Some(format!("icon={}\n", icon)))
+        .map(|icon| format!("icon={}\n", icon))
         .or_else(|| Some(String::from("#icon=metadata/icon.png\n")))
         .unwrap();
 
@@ -87,7 +87,7 @@ pub fn generate_metadata(project: &Path) {
     let name_line = config
         .project
         .name
-        .and_then(|name| Some(format!("gametitle={}\n", name)))
+        .map(|name| format!("gametitle={}\n", name))
         .or_else(|| Some(String::from("#gametitle=My Game\n")))
         .unwrap();
 
@@ -96,7 +96,7 @@ pub fn generate_metadata(project: &Path) {
     let version_line = config
         .project
         .version
-        .and_then(|version| Some(format!("version={}\n", version)))
+        .map(|version| format!("version={}\n", version))
         .or_else(|| Some(String::from("#version=0.1\n")))
         .unwrap();
 
@@ -107,7 +107,7 @@ pub fn generate_metadata(project: &Path) {
 
         let username_line = itch
             .username
-            .and_then(|username| Some(format!("devid={}\n", username)))
+            .map(|username| format!("devid={}\n", username))
             .or_else(|| Some(String::from("#devid=myname\n")))
             .unwrap();
 
@@ -115,7 +115,7 @@ pub fn generate_metadata(project: &Path) {
 
         let url_line = itch
             .url
-            .and_then(|url| Some(format!("gameid={}\n", url.split("/").last().unwrap())))
+            .map(|url| format!("gameid={}\n", url.split('/').last().unwrap()))
             .or_else(|| Some(String::from("#gameid=mygame\n")))
             .unwrap();
         metadata.push_str(url_line.as_str());

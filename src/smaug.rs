@@ -26,7 +26,7 @@ fn project_dirs() -> ProjectDirs {
     let project_dirs = ProjectDirs::from("org", "Erebor Studios", "Smaug");
 
     match project_dirs {
-        Some(dirs) => return dirs,
+        Some(dirs) => dirs,
         None => {
             print_error("No project directories found");
             process::exit(exitcode::OSFILE);
