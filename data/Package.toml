@@ -1,0 +1,12 @@
+[project]
+name = "TODO: Package Name"
+author = "TODO: Author Name"
+version = "0.1.0"
+url = "TODO: Package Website"
+
+[files]
+
+# Examples
+#
+# from = to
+# "lib/library.rb" = "app/lib/library.rb"

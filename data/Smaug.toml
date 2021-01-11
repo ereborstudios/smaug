@@ -1,9 +1,9 @@
 [project]
-name = "My Game"
+name = "TODO: Project Name"
 version = "0.1.0"
-author = "My Name"
+author = "TODO: Author Name"
 icon = "metadata/icon.png"
-url = "https://example.com"
+url = "TODO: Project Website"
 
 # Uncomment the below to publish your game to https://itch.io
 # [itch]

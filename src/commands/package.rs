@@ -28,7 +28,7 @@ pub fn call(matches: &clap::ArgMatches) {
     }
 
     generate_config(&path);
-    info!("Created Smaug.toml edit the values with your project's information.");
+    info!("Created Smaug.toml edit the values with your package's information.");
     scrawl::editor::new()
         .file(path.to_str().unwrap())
         .edit()
@@ -37,7 +37,7 @@ pub fn call(matches: &clap::ArgMatches) {
 }
 
 pub fn generate_config(path: &Path) {
-    let config = include_str!("../../data/Smaug.toml");
+    let config = include_str!("../../data/Package.toml");
 
     trace!("Writing Smaug configuration to {}", path.to_str().unwrap());
     fs::write(path, config).unwrap();
