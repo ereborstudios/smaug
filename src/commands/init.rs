@@ -15,6 +15,7 @@ pub fn call(matches: &clap::ArgMatches) {
         .value_of("PATH")
         .unwrap_or_else(|| current_directory.to_str().unwrap());
     debug!("Directory: {}", directory);
+
     let pathbuf = Path::new(directory).join("Smaug.toml");
     let path = pathbuf.as_path();
     debug!("Smaug Configuration: {}", path.to_str().unwrap());
@@ -27,6 +28,7 @@ pub fn call(matches: &clap::ArgMatches) {
         process::exit(exitcode::USAGE);
     }
 
+    generate_gitignore(Path::new(directory));
     generate_config(&path);
     info!("Created Smaug.toml edit the values with your project's information.");
     scrawl::editor::new()
@@ -41,4 +43,12 @@ pub fn generate_config(path: &Path) {
 
     trace!("Writing Smaug configuration to {}", path.to_str().unwrap());
     fs::write(path, config).unwrap();
+}
+
+pub fn generate_gitignore(path: &Path) {
+    let gitignore = include_str!("../../data/gitignore");
+    let gitignore_path = path.join(".gitignore");
+
+    trace!("Writing .gitignore to {}", gitignore_path.to_str().unwrap());
+    fs::write(gitignore_path, gitignore).unwrap();
 }

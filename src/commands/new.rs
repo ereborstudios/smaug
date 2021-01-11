@@ -28,6 +28,15 @@ pub fn call(matches: &clap::ArgMatches) {
     copy_directory(template, destination.to_path_buf());
 
     init::generate_config(&destination.join("Smaug.toml").as_path());
+
+    info!("Created Smaug.toml edit the values with your project's information.");
+    scrawl::editor::new()
+        .file(&destination.join("Smaug.toml").as_path())
+        .edit()
+        .open()
+        .unwrap();
+
+    init::generate_gitignore(&destination);
 }
 
 fn copy_directory(source: PathBuf, destination: PathBuf) {
