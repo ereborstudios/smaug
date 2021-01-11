@@ -27,27 +27,27 @@ impl Dependency {
                 branch: config.branch.clone(),
             };
 
-            return Some(dependency);
+            Some(dependency)
         } else if config.dir.is_some() {
             let dependency = Dependency::Dir {
                 path: Path::new(&config.dir.as_ref().unwrap()).to_path_buf(),
             };
 
-            return Some(dependency);
+            Some(dependency)
         } else if config.url.is_some() {
             let dependency = Dependency::Url {
                 location: config.url.as_ref().unwrap().clone(),
             };
 
-            return Some(dependency);
+            Some(dependency)
         } else if config.file.is_some() {
             let dependency = Dependency::File {
                 path: Path::new(&config.file.as_ref().unwrap()).to_path_buf(),
             };
 
-            return Some(dependency);
+            Some(dependency)
         } else {
-            return None;
+            None
         }
     }
 }

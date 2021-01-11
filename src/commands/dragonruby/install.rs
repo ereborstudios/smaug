@@ -36,7 +36,7 @@ fn setup_destination() -> PathBuf {
     });
 
     match result {
-        Ok(()) => return destination.to_path_buf(),
+        Ok(()) => destination.to_path_buf(),
         Err(error) => {
             smaug::print_error(format!(
                 "Could not create directory at {}\n{}",
