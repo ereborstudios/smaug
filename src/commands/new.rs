@@ -28,6 +28,7 @@ pub fn call(matches: &clap::ArgMatches) {
     copy_directory(template, destination.to_path_buf());
 
     init::generate_config(&destination.join("Smaug.toml").as_path());
+    init::generate_gitignore(&destination);
 }
 
 fn copy_directory(source: PathBuf, destination: PathBuf) {

@@ -1,3 +1,4 @@
+pub mod build;
 pub mod dragonruby;
 pub mod init;
 pub mod install;

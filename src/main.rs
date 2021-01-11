@@ -45,7 +45,11 @@ fn main() {
             (@arg PATH: "The path to your package. Defaults to the current directory.")
         )
         (@subcommand run =>
-            (about: "Runs a DragonRuby project")
+            (about: "Runs your DragonRuby project.")
+            (@arg PATH: "The path to your project. Defaults to the current directory.")
+        )
+        (@subcommand build =>
+            (about: "Builds your DragonRuby project.")
             (@arg PATH: "The path to your project. Defaults to the current directory.")
         )
         (@subcommand install =>
@@ -71,6 +75,7 @@ fn main() {
         }
         Some("new") => commands::new::call(matches.subcommand_matches("new").unwrap()),
         Some("run") => commands::run::call(matches.subcommand_matches("run").unwrap()),
+        Some("build") => commands::build::call(matches.subcommand_matches("build").unwrap()),
         Some("init") => commands::init::call(matches.subcommand_matches("init").unwrap()),
         Some("package") => commands::package::call(matches.subcommand_matches("package").unwrap()),
         Some("install") => commands::install::call(matches.subcommand_matches("install").unwrap()),
