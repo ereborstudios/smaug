@@ -1,6 +1,9 @@
+use crate::dependency::Dependency;
 use crate::digest;
 use crate::dragonruby;
+use crate::lock;
 use crate::lock::Lock;
+use crate::project_config;
 use crate::project_config::ProjectConfig;
 use crate::smaug;
 use log::*;
@@ -22,6 +25,31 @@ pub fn call(matches: &clap::ArgMatches) -> io::Result<()> {
     debug!("Project Path: {}", path.to_str().unwrap());
 
     dragonruby::ensure_smaug_project(path);
+
+    if matches.is_present("PACKAGE") {
+        println!("Installing Individual Package");
+        println!("{:?}", matches.value_of("PACKAGE"));
+        install_package(&path, matches.value_of("PACKAGE").unwrap())?;
+    } else {
+        install_from_config(&path)?;
+    }
+
+    Ok(())
+}
+
+fn install_package(path: &Path, package: &str) -> io::Result<()> {
+    let dependency_config = project_config::load_dependency_string("temp", package);
+    let dependency = Dependency::from_config(&dependency_config).unwrap();
+
+    let dependency_path = dependency.cache();
+    let file_lock = lock::parse_package(&dependency_path, dependency.name);
+    let lock = Lock { files: file_lock };
+
+    install_packages(&lock, &path)?;
+    Ok(())
+}
+
+fn install_from_config(path: &Path) -> io::Result<()> {
     let config = ProjectConfig::load(path.join("Smaug.toml"));
     debug!("Smaug Configuration: {:?}", config);
 
@@ -31,6 +59,7 @@ pub fn call(matches: &clap::ArgMatches) -> io::Result<()> {
     match lock_result {
         Ok(lock) => {
             install_packages(&lock, &path)?;
+            remove_packages(&lock, &path)?;
             create_index(&lock, &path)?;
             create_lock_file(&lock, &path)?;
         }
@@ -50,7 +79,62 @@ fn install_packages(lock: &Lock, path: &Path) -> io::Result<()> {
 
     let mut files_to_install = HashSet::new();
     let mut changed_files = HashSet::new();
+
+    for file in lock.files.clone() {
+        let destination = path.join(file.destination.clone());
+        let destination_string = String::from(destination.clone().to_str().unwrap());
+        files_to_install.insert(destination_string);
+    }
+
+    if let Some(previous_lock_file) = previous_lock {
+        for file in previous_lock_file.files.clone() {
+            let destination = path.join(file.destination.clone());
+            let destination_string = String::from(destination.clone().to_str().unwrap());
+            if destination.exists() {
+                let digest = digest::file(&destination.clone()).unwrap();
+
+                if !digest.eq(&file.digest) {
+                    changed_files.insert(destination_string);
+                }
+            }
+        }
+    }
+
+    for file in lock.files.iter() {
+        let destination = path.join(file.destination.clone());
+        let destination_string = String::from(destination.clone().to_str().unwrap());
+
+        if changed_files.contains(&destination_string.clone()) {
+            let changed_path = destination_string.replace(path.to_str().unwrap(), "");
+            let changed_path = changed_path.replacen('/', "", 1);
+
+            let question = format!(
+                "{} has changed since the last install. Do you want to overwrite it?",
+                changed_path
+            );
+
+            let answer = Question::new(question.as_str())
+                .default(Answer::YES)
+                .show_defaults()
+                .confirm();
+
+            if answer == Answer::YES {
+                copy_file(&file.clone().source.unwrap(), &destination)?;
+            }
+        } else {
+            copy_file(&file.clone().source.unwrap(), &destination)?;
+        }
+    }
+    Ok(())
+}
+
+fn remove_packages(lock: &Lock, path: &Path) -> io::Result<()> {
+    trace!("Removing unused packages");
+    let previous_lock = read_lock_file(path);
+    debug!("Existing Lock: {:?}", previous_lock);
+
     let mut deleted_files = HashMap::new();
+    let mut files_to_install = HashSet::new();
 
     for file in lock.files.clone() {
         let destination = path.join(file.destination.clone());
@@ -65,18 +149,6 @@ fn install_packages(lock: &Lock, path: &Path) -> io::Result<()> {
 
             if !files_to_install.contains(&destination_string) {
                 deleted_files.insert(destination_string, file);
-            }
-        }
-
-        for file in previous_lock_file.files.clone() {
-            let destination = path.join(file.destination.clone());
-            let destination_string = String::from(destination.clone().to_str().unwrap());
-            if destination.exists() {
-                let digest = digest::file(&destination.clone()).unwrap();
-
-                if !digest.eq(&file.digest) {
-                    changed_files.insert(destination_string);
-                }
             }
         }
     }
@@ -109,31 +181,6 @@ fn install_packages(lock: &Lock, path: &Path) -> io::Result<()> {
         }
     }
 
-    for file in lock.files.iter() {
-        let destination = path.join(file.destination.clone());
-        let destination_string = String::from(destination.clone().to_str().unwrap());
-
-        if changed_files.contains(&destination_string.clone()) {
-            let changed_path = destination_string.replace(path.to_str().unwrap(), "");
-            let changed_path = changed_path.replacen('/', "", 1);
-
-            let question = format!(
-                "{} has changed since the last install. Do you want to overwrite it?",
-                changed_path
-            );
-
-            let answer = Question::new(question.as_str())
-                .default(Answer::YES)
-                .show_defaults()
-                .confirm();
-
-            if answer == Answer::YES {
-                copy_file(&file.clone().source.unwrap(), &destination)?;
-            }
-        } else {
-            copy_file(&file.clone().source.unwrap(), &destination)?;
-        }
-    }
     Ok(())
 }
 

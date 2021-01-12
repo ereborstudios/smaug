@@ -147,7 +147,7 @@ fn load_dependency((name, value): (&String, &Value)) -> Dependency {
     }
 }
 
-fn load_dependency_string(name: &str, value: &str) -> Dependency {
+pub fn load_dependency_string(name: &str, value: &str) -> Dependency {
     let path = Path::new(value);
     let mut dir: Option<String> = None;
     let mut repo: Option<String> = None;
