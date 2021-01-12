@@ -1,9 +1,11 @@
 use crate::dependency::Dependency;
+use crate::digest;
 use crate::project_config::ProjectConfig;
 use log::*;
+use std::collections::HashMap;
 use std::path::PathBuf;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) struct FileLock {
     pub(crate) package: String,
     pub(crate) source: PathBuf,
@@ -12,13 +14,23 @@ pub(crate) struct FileLock {
     pub(crate) require: bool,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) struct Lock {
     pub(crate) files: Vec<FileLock>,
 }
 
+#[derive(Debug)]
+pub enum LockError {
+    ConflictingPackages {
+        packages: (String, String),
+        file: String,
+    },
+}
+
+type LockResult = Result<Lock, LockError>;
+
 impl Lock {
-    pub fn from_config(config: &ProjectConfig) -> Lock {
+    pub fn from_config(config: &ProjectConfig) -> LockResult {
         trace!("Calculating lock");
         let mut files: Vec<FileLock> = vec![];
 
@@ -31,8 +43,47 @@ impl Lock {
                 .unwrap()
         }
 
-        Lock { files }
+        let lock = Lock { files };
+        match validate(&lock) {
+            Ok(()) => Ok(lock),
+            Err(error) => Err(error),
+        }
     }
+}
+
+fn validate(lock: &Lock) -> Result<(), LockError> {
+    validate_no_conflicting_files(lock)
+}
+
+fn validate_no_conflicting_files(lock: &Lock) -> Result<(), LockError> {
+    let mut map: HashMap<&str, &FileLock> = HashMap::new();
+    let files = lock.files.iter();
+
+    for file in files {
+        let destination = file.destination.to_str().unwrap();
+        let package = file.package.clone();
+
+        if map.contains_key(destination) {
+            let conflicting = map.get(&destination).unwrap();
+            let conflicting_package = conflicting.package.clone();
+
+            let original_digest = digest::file(file.source.as_path()).unwrap();
+            let conflicting_digest = digest::file(conflicting.source.as_path()).unwrap();
+
+            if original_digest != conflicting_digest {
+                let error = LockError::ConflictingPackages {
+                    packages: (package, conflicting_package),
+                    file: String::from(destination),
+                };
+
+                return Err(error);
+            }
+        }
+
+        map.insert(destination, &file);
+    }
+
+    Ok(())
 }
 
 fn parse_package(path: &PathBuf, name: String) -> Vec<FileLock> {
@@ -43,13 +94,16 @@ fn parse_package(path: &PathBuf, name: String) -> Vec<FileLock> {
     for file in config.files {
         trace!("Parsing file: {:?}", file);
         let source = path.join(file.from.clone());
+        let digest = digest::file(&source).unwrap();
+
         let file_lock = FileLock {
             source,
+            digest,
             package: name.clone(),
             destination: PathBuf::from(file.to),
             require: file.require,
-            digest: String::from("asdfasdf"),
         };
+        debug!("FileLock: {:?}", file_lock);
 
         files.push(file_lock);
     }

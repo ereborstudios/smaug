@@ -2,6 +2,7 @@ extern crate exitcode;
 
 mod commands;
 mod dependency;
+mod digest;
 mod dragonruby;
 mod file;
 mod git;
@@ -11,8 +12,9 @@ mod smaug;
 mod url;
 
 use clap::clap_app;
+use std::io;
 
-fn main() {
+fn main() -> io::Result<()> {
     let matches = clap_app!(smaug =>
         (version: "0.1.0")
         (author: "Matt Pruitt <matt@guitsaru.com>")
@@ -84,9 +86,11 @@ fn main() {
         Some("publish") => commands::publish::call(matches.subcommand_matches("publish").unwrap()),
         Some("init") => commands::init::call(matches.subcommand_matches("init").unwrap()),
         Some("package") => commands::package::call(matches.subcommand_matches("package").unwrap()),
-        Some("install") => commands::install::call(matches.subcommand_matches("install").unwrap()),
+        Some("install") => commands::install::call(matches.subcommand_matches("install").unwrap())?,
         _ => unreachable!(),
     }
+
+    Ok(())
 }
 
 fn start_log(matches: &clap::ArgMatches) {
