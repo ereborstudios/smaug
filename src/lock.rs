@@ -90,7 +90,7 @@ fn validate_no_conflicting_files(lock: &Lock) -> Result<(), LockError> {
     Ok(())
 }
 
-fn parse_package(path: &PathBuf, name: String) -> Vec<FileLock> {
+pub(crate) fn parse_package(path: &PathBuf, name: String) -> Vec<FileLock> {
     let config = ProjectConfig::load(path.join("Smaug.toml"));
     debug!("PackageConfig: {:?}", config);
     let mut files: Vec<FileLock> = vec![];
