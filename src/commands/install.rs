@@ -26,10 +26,10 @@ pub fn call(matches: &clap::ArgMatches) -> io::Result<()> {
 
     dragonruby::ensure_smaug_project(path);
 
-    if matches.is_present("PACKAGE") {
+    if matches.is_present("package") {
         println!("Installing Individual Package");
-        println!("{:?}", matches.value_of("PACKAGE"));
-        install_package(&path, matches.value_of("PACKAGE").unwrap())?;
+        println!("{:?}", matches.value_of("package"));
+        install_package(&path, matches.value_of("package").unwrap())?;
     } else {
         install_from_config(&path)?;
     }

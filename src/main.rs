@@ -62,7 +62,7 @@ fn main() -> io::Result<()> {
         (@subcommand install =>
             (about: "Installs dependencies from Smaug.toml.")
             (@arg PATH: "The path to your project. Defaults to the current directory.")
-            (@arg PACKAGE: "The location of a package to install. If not provided, will install from Smaug.toml.")
+            (@arg package: --package takes_value(true) "The location of a package to install. If not provided, will install from Smaug.toml.")
         )
     )
     .get_matches();
