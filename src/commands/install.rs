@@ -82,10 +82,10 @@ fn install_packages(lock: &Lock, path: &Path) -> io::Result<()> {
                 .confirm();
 
             if answer == Answer::YES {
-                copy_file(&file.clone().source, &destination)?;
+                copy_file(&file.clone().source.unwrap(), &destination)?;
             }
         } else {
-            copy_file(&file.clone().source, &destination)?;
+            copy_file(&file.clone().source.unwrap(), &destination)?;
         }
     }
     Ok(())

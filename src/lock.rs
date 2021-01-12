@@ -10,7 +10,8 @@ use std::path::PathBuf;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct FileLock {
     pub(crate) package: String,
-    pub(crate) source: PathBuf,
+    #[serde(skip_serializing)]
+    pub(crate) source: Option<PathBuf>,
     pub(crate) destination: PathBuf,
     pub(crate) digest: String,
     pub(crate) require: bool,
@@ -69,8 +70,9 @@ fn validate_no_conflicting_files(lock: &Lock) -> Result<(), LockError> {
             let conflicting = map.get(&destination).unwrap();
             let conflicting_package = conflicting.package.clone();
 
-            let original_digest = digest::file(file.source.as_path()).unwrap();
-            let conflicting_digest = digest::file(conflicting.source.as_path()).unwrap();
+            let original_digest = digest::file(file.source.clone().unwrap().as_path()).unwrap();
+            let conflicting_digest =
+                digest::file(conflicting.source.clone().unwrap().as_path()).unwrap();
 
             if original_digest != conflicting_digest {
                 let error = LockError::ConflictingPackages {
@@ -99,9 +101,9 @@ fn parse_package(path: &PathBuf, name: String) -> Vec<FileLock> {
         let digest = digest::file(&source).unwrap();
 
         let file_lock = FileLock {
-            source,
             digest,
             package: name.clone(),
+            source: Some(source),
             destination: PathBuf::from(file.to),
             require: file.require,
         };
