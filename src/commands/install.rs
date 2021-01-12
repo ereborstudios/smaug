@@ -1,17 +1,19 @@
-use crate::dependency::Dependency;
+use crate::digest;
 use crate::dragonruby;
-use crate::file;
-use crate::git;
+use crate::lock::Lock;
 use crate::project_config::ProjectConfig;
 use crate::smaug;
-use crate::url;
 use log::*;
+use question::{Answer, Question};
+use std::collections::HashMap;
+use std::collections::HashSet;
 use std::env;
 use std::fs;
+use std::io;
 use std::path::Path;
 use std::process;
 
-pub fn call(matches: &clap::ArgMatches) {
+pub fn call(matches: &clap::ArgMatches) -> io::Result<()> {
     let current_directory = env::current_dir().unwrap();
     let filename: &str = matches
         .value_of("PATH")
@@ -23,80 +25,169 @@ pub fn call(matches: &clap::ArgMatches) {
     let config = ProjectConfig::load(path.join("Smaug.toml"));
     debug!("Smaug Configuration: {:?}", config);
 
-    let mut index = start_index();
+    let lock_result = Lock::from_config(&config);
+    debug!("Lock: {:?}", lock_result);
 
-    for dependency in config.dependencies {
-        let cache_dir = smaug::cache_dir();
-        debug!("Cache directory {}", cache_dir.to_str().unwrap());
+    match lock_result {
+        Ok(lock) => {
+            install_packages(&lock, &path)?;
+            create_index(&lock, &path)?;
+            create_lock_file(&lock, &path)?;
+        }
+        Err(error) => {
+            smaug::print_error(format!("Lock file error: {:?}", error));
+            process::exit(exitcode::DATAERR);
+        }
+    }
 
-        match Dependency::from_config(&dependency) {
-            Some(Dependency::Git { repo, branch }) => {
-                let clone = git::Clone { repo, branch };
-                let destination = cache_dir.join(dependency.name.as_ref().unwrap());
-                clone.clone(&destination);
-                let source = destination.clone();
-                copy_package(&source, &path, &mut index);
+    Ok(())
+}
+
+fn install_packages(lock: &Lock, path: &Path) -> io::Result<()> {
+    trace!("Installing packages");
+    let previous_lock = read_lock_file(path);
+    debug!("Existing Lock: {:?}", previous_lock);
+
+    let mut files_to_install = HashSet::new();
+    let mut changed_files = HashSet::new();
+    let mut deleted_files = HashMap::new();
+
+    for file in lock.files.clone() {
+        let destination = path.join(file.destination.clone());
+        let destination_string = String::from(destination.clone().to_str().unwrap());
+        files_to_install.insert(destination_string);
+    }
+
+    if let Some(previous_lock_file) = previous_lock {
+        for file in previous_lock_file.files.clone() {
+            let destination = path.join(file.destination.clone());
+            let destination_string = String::from(destination.clone().to_str().unwrap());
+
+            if !files_to_install.contains(&destination_string) {
+                deleted_files.insert(destination_string, file);
             }
-            Some(Dependency::Dir { path: dir }) => {
-                let source = dir.to_path_buf();
-                copy_package(&source, &path, &mut index);
-            }
-            Some(Dependency::Url { location }) => {
-                let source = cache_dir.join(format!("{}.zip", dependency.name.as_ref().unwrap()));
-                let destination = cache_dir.join(dependency.name.as_ref().unwrap());
-                url::download(&location, &source);
-                file::unzip(&source, &destination);
-                copy_package(&destination, &path, &mut index);
-            }
-            Some(Dependency::File { path: zip }) => {
-                let destination = cache_dir.join(dependency.name.as_ref().unwrap());
-                file::unzip(&zip, &destination);
-                copy_package(&destination, &path, &mut index);
-            }
-            None => {
-                smaug::print_error(format!("Malformed dependency: {:?}", dependency));
-                process::exit(exitcode::DATAERR);
+        }
+
+        for file in previous_lock_file.files.clone() {
+            let destination = path.join(file.destination.clone());
+            let destination_string = String::from(destination.clone().to_str().unwrap());
+            if destination.exists() {
+                let digest = digest::file(&destination.clone()).unwrap();
+
+                if !digest.eq(&file.digest) {
+                    changed_files.insert(destination_string);
+                }
             }
         }
     }
 
-    debug!("Writing require file to {}", path.to_str().unwrap());
-    write_index(&index, &path);
-}
+    for (.., file) in deleted_files {
+        let destination = path.join(file.destination.clone());
+        let destination_string = String::from(destination.clone().to_str().unwrap());
+        let digest = digest::file(&destination).unwrap();
 
-fn copy_package(package: &Path, project: &Path, index: &mut String) {
-    let package_project = ProjectConfig::load(package.join("Smaug.toml"));
-    debug!("Package Config: {:?}", package_project);
+        if destination.exists() && !digest.eq(&file.digest) {
+            let changed_path = destination_string.replace(path.to_str().unwrap(), "");
+            let changed_path = changed_path.replacen('/', "", 1);
 
-    for file in package_project.files {
-        let source = package.join(file.from.clone());
-        let destination = project.join(file.to.clone());
+            let question = format!(
+                "{} has changed since the last install. Do you want to delete it?",
+                changed_path
+            );
 
-        trace!(
-            "Creating directory {}",
-            destination.parent().and_then(|p| p.to_str()).unwrap()
-        );
-        fs::create_dir_all(destination.parent().unwrap()).unwrap();
-        trace!(
-            "Copying file from {} to {}",
-            source.to_str().unwrap(),
-            destination.to_str().unwrap()
-        );
-        fs::copy(source, destination).unwrap();
-        index.push_str(format!("require \"{}\"\n", file.to.clone()).as_str());
+            let answer = Question::new(question.as_str())
+                .default(Answer::YES)
+                .show_defaults()
+                .confirm();
+
+            if answer == Answer::YES {
+                trace!("Removing file {}", destination.to_str().unwrap());
+                fs::remove_file(destination)?;
+            }
+        } else {
+            fs::remove_file(destination)?;
+        }
     }
+
+    for file in lock.files.iter() {
+        let destination = path.join(file.destination.clone());
+        let destination_string = String::from(destination.clone().to_str().unwrap());
+
+        if changed_files.contains(&destination_string.clone()) {
+            let changed_path = destination_string.replace(path.to_str().unwrap(), "");
+            let changed_path = changed_path.replacen('/', "", 1);
+
+            let question = format!(
+                "{} has changed since the last install. Do you want to overwrite it?",
+                changed_path
+            );
+
+            let answer = Question::new(question.as_str())
+                .default(Answer::YES)
+                .show_defaults()
+                .confirm();
+
+            if answer == Answer::YES {
+                copy_file(&file.clone().source.unwrap(), &destination)?;
+            }
+        } else {
+            copy_file(&file.clone().source.unwrap(), &destination)?;
+        }
+    }
+    Ok(())
 }
 
-fn start_index() -> String {
-    let mut output = String::new();
-    output.push_str("# This file is automatically @generated by Smaug.\n");
-    output.push_str("# Do not edit it manually.\n\n");
+fn copy_file(source: &Path, destination: &Path) -> io::Result<()> {
+    let directory = destination.parent().unwrap();
+    trace!("Creating directory {}", directory.to_str().unwrap());
+    fs::create_dir_all(directory)?;
 
-    output
+    trace!(
+        "Copying file from {} to {}",
+        source.to_str().unwrap(),
+        destination.to_str().unwrap()
+    );
+    fs::copy(source, destination)?;
+    Ok(())
 }
 
-fn write_index(index: &str, dir: &Path) {
-    let destination = dir.join("app/smaug.rb");
-    fs::write(destination, index).unwrap();
-    info!("Add `require \"app/smaug.rb\"` to the top of your `main.rb` file.");
+fn create_index(lock: &Lock, path: &Path) -> io::Result<()> {
+    trace!("Creating file index");
+    let mut index = String::new();
+    index.push_str("# This file is automatically @generated by Smaug.\n");
+    index.push_str("# Do not edit it manually.\n\n");
+
+    for file in lock.files.iter() {
+        if file.require {
+            let destination = file.destination.to_str().unwrap();
+            let require = format!("require \"{}\"\n", destination);
+            index.push_str(require.as_str());
+        }
+    }
+
+    let index_file = path.join("app/smaug.rb");
+    fs::write(index_file, index)?;
+    Ok(())
+}
+
+fn create_lock_file(lock: &Lock, path: &Path) -> io::Result<()> {
+    trace!("Creating Smaug.lock");
+    let lock_file = path.join("Smaug.lock");
+    let lock_contents = toml::to_string(&lock).unwrap();
+
+    fs::write(lock_file, lock_contents)?;
+    Ok(())
+}
+
+fn read_lock_file(path: &Path) -> Option<Lock> {
+    let file = path.join("Smaug.lock");
+
+    if file.exists() {
+        let contents = fs::read_to_string(file).unwrap();
+        let lock: Lock = toml::from_str(&contents).unwrap();
+
+        Some(lock)
+    } else {
+        None
+    }
 }

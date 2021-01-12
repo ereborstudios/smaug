@@ -10,3 +10,4 @@ url = "TODO: Package Website"
 #
 # from = to
 # "lib/library.rb" = "app/lib/library.rb"
+# "lib/library.rb" = { path = "app/lib/library.rb", require = false }
