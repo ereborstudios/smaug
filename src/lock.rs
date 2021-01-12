@@ -2,10 +2,12 @@ use crate::dependency::Dependency;
 use crate::digest;
 use crate::project_config::ProjectConfig;
 use log::*;
+use serde::Deserialize;
+use serde::Serialize;
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct FileLock {
     pub(crate) package: String,
     pub(crate) source: PathBuf,
@@ -14,7 +16,7 @@ pub(crate) struct FileLock {
     pub(crate) require: bool,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct Lock {
     pub(crate) files: Vec<FileLock>,
 }

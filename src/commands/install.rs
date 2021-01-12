@@ -1,8 +1,11 @@
+use crate::digest;
 use crate::dragonruby;
 use crate::lock::Lock;
 use crate::project_config::ProjectConfig;
 use crate::smaug;
 use log::*;
+use question::{Answer, Question};
+use std::collections::HashSet;
 use std::env;
 use std::fs;
 use std::io;
@@ -27,7 +30,8 @@ pub fn call(matches: &clap::ArgMatches) -> io::Result<()> {
     match lock_result {
         Ok(lock) => {
             install_packages(&lock, &path)?;
-            create_index(&lock, &path)?
+            create_index(&lock, &path)?;
+            create_lock_file(&lock, &path)?;
         }
         Err(error) => {
             smaug::print_error(format!("Lock file error: {:?}", error));
@@ -40,9 +44,49 @@ pub fn call(matches: &clap::ArgMatches) -> io::Result<()> {
 
 fn install_packages(lock: &Lock, path: &Path) -> io::Result<()> {
     trace!("Installing packages");
+    let previous_lock = read_lock_file(path);
+    debug!("Existing Lock: {:?}", previous_lock);
+
+    let mut changed_files = HashSet::new();
+
+    if let Some(previous_lock_file) = previous_lock {
+        for file in previous_lock_file.files {
+            let destination = path.join(file.destination.clone());
+            let destination_string = String::from(destination.clone().to_str().unwrap());
+            if destination.exists() {
+                let digest = digest::file(&destination.clone()).unwrap();
+
+                if !digest.eq(&file.digest) {
+                    changed_files.insert(destination_string);
+                }
+            }
+        }
+    }
+
     for file in lock.files.iter() {
         let destination = path.join(file.destination.clone());
-        copy_file(&file.clone().source, &destination)?;
+        let destination_string = String::from(destination.clone().to_str().unwrap());
+
+        if changed_files.contains(&destination_string.clone()) {
+            let changed_path = destination_string.replace(path.to_str().unwrap(), "");
+            let changed_path = changed_path.replacen('/', "", 1);
+
+            let question = format!(
+                "{} has changed since the last install. Do you want to overwrite it?",
+                changed_path
+            );
+
+            let answer = Question::new(question.as_str())
+                .default(Answer::YES)
+                .show_defaults()
+                .confirm();
+
+            if answer == Answer::YES {
+                copy_file(&file.clone().source, &destination)?;
+            }
+        } else {
+            copy_file(&file.clone().source, &destination)?;
+        }
     }
     Ok(())
 }
@@ -68,10 +112,36 @@ fn create_index(lock: &Lock, path: &Path) -> io::Result<()> {
     index.push_str("# Do not edit it manually.\n\n");
 
     for file in lock.files.iter() {
-        index.push_str(format!("require \"{}\"\n", file.destination.to_str().unwrap()).as_str());
+        if file.require {
+            let destination = file.destination.to_str().unwrap();
+            let require = format!("require \"{}\"\n", destination);
+            index.push_str(require.as_str());
+        }
     }
 
     let index_file = path.join("app/smaug.rb");
     fs::write(index_file, index)?;
     Ok(())
+}
+
+fn create_lock_file(lock: &Lock, path: &Path) -> io::Result<()> {
+    trace!("Creating Smaug.lock");
+    let lock_file = path.join("Smaug.lock");
+    let lock_contents = toml::to_string(&lock).unwrap();
+
+    fs::write(lock_file, lock_contents)?;
+    Ok(())
+}
+
+fn read_lock_file(path: &Path) -> Option<Lock> {
+    let file = path.join("Smaug.lock");
+
+    if file.exists() {
+        let contents = fs::read_to_string(file).unwrap();
+        let lock: Lock = toml::from_str(&contents).unwrap();
+
+        Some(lock)
+    } else {
+        None
+    }
 }
