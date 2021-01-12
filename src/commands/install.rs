@@ -5,6 +5,7 @@ use crate::project_config::ProjectConfig;
 use crate::smaug;
 use log::*;
 use question::{Answer, Question};
+use std::collections::HashMap;
 use std::collections::HashSet;
 use std::env;
 use std::fs;
@@ -47,10 +48,27 @@ fn install_packages(lock: &Lock, path: &Path) -> io::Result<()> {
     let previous_lock = read_lock_file(path);
     debug!("Existing Lock: {:?}", previous_lock);
 
+    let mut files_to_install = HashSet::new();
     let mut changed_files = HashSet::new();
+    let mut deleted_files = HashMap::new();
+
+    for file in lock.files.clone() {
+        let destination = path.join(file.destination.clone());
+        let destination_string = String::from(destination.clone().to_str().unwrap());
+        files_to_install.insert(destination_string);
+    }
 
     if let Some(previous_lock_file) = previous_lock {
-        for file in previous_lock_file.files {
+        for file in previous_lock_file.files.clone() {
+            let destination = path.join(file.destination.clone());
+            let destination_string = String::from(destination.clone().to_str().unwrap());
+
+            if !files_to_install.contains(&destination_string) {
+                deleted_files.insert(destination_string, file);
+            }
+        }
+
+        for file in previous_lock_file.files.clone() {
             let destination = path.join(file.destination.clone());
             let destination_string = String::from(destination.clone().to_str().unwrap());
             if destination.exists() {
@@ -60,6 +78,34 @@ fn install_packages(lock: &Lock, path: &Path) -> io::Result<()> {
                     changed_files.insert(destination_string);
                 }
             }
+        }
+    }
+
+    for (.., file) in deleted_files {
+        let destination = path.join(file.destination.clone());
+        let destination_string = String::from(destination.clone().to_str().unwrap());
+        let digest = digest::file(&destination).unwrap();
+
+        if destination.exists() && !digest.eq(&file.digest) {
+            let changed_path = destination_string.replace(path.to_str().unwrap(), "");
+            let changed_path = changed_path.replacen('/', "", 1);
+
+            let question = format!(
+                "{} has changed since the last install. Do you want to delete it?",
+                changed_path
+            );
+
+            let answer = Question::new(question.as_str())
+                .default(Answer::YES)
+                .show_defaults()
+                .confirm();
+
+            if answer == Answer::YES {
+                trace!("Removing file {}", destination.to_str().unwrap());
+                fs::remove_file(destination)?;
+            }
+        } else {
+            fs::remove_file(destination)?;
         }
     }
 
