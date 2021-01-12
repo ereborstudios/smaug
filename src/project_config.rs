@@ -1,4 +1,5 @@
 use crate::smaug;
+use log::*;
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
@@ -6,7 +7,7 @@ use std::process;
 use toml::Value;
 use url::Url;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ProjectConfig {
     pub project: Project,
     pub itch: Option<Itch>,
@@ -14,7 +15,7 @@ pub struct ProjectConfig {
     pub files: Vec<File>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Project {
     pub author: Option<String>,
     pub icon: Option<String>,
@@ -23,13 +24,13 @@ pub struct Project {
     pub version: Option<String>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Itch {
     pub url: Option<String>,
     pub username: Option<String>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Dependency {
     pub branch: Option<String>,
     pub dir: Option<String>,
@@ -39,10 +40,11 @@ pub struct Dependency {
     pub file: Option<String>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct File {
     pub from: String,
     pub to: String,
+    pub require: bool,
 }
 
 impl ProjectConfig {
@@ -122,6 +124,7 @@ fn load_itch(value: &Value) -> Option<Itch> {
 }
 
 fn load_dependencies(value: &Value) -> Option<Vec<Dependency>> {
+    debug!("Dependencies: {:?}", value);
     return value.as_table().map(|dependencies| {
         dependencies
             .into_iter()
@@ -131,6 +134,9 @@ fn load_dependencies(value: &Value) -> Option<Vec<Dependency>> {
 }
 
 fn load_dependency((name, value): (&String, &Value)) -> Dependency {
+    trace!("Loading dependency {}", name);
+    debug!("{:?}", value);
+
     match value {
         Value::Table(..) => load_dependency_table(name, value),
         Value::String(..) => load_dependency_string(name, value.as_str().unwrap()),
@@ -204,9 +210,33 @@ fn load_files(value: &Value) -> Option<Vec<File>> {
         .map(|files| files.into_iter().map(load_file).collect::<Vec<File>>());
 }
 
-fn load_file((from, to): (&String, &Value)) -> File {
-    return File {
-        from: from.clone(),
-        to: String::from(to.as_str().unwrap()),
-    };
+fn load_file((from, declaration): (&String, &Value)) -> File {
+    match declaration {
+        Value::String(..) => File {
+            from: from.clone(),
+            to: String::from(declaration.as_str().unwrap()),
+            require: true,
+        },
+        Value::Table(..) => {
+            let to: &str;
+
+            match declaration.get("path") {
+                Some(val) => to = val.as_str().unwrap(),
+                None => {
+                    smaug::print_error(format!("File {} must include a path value.", from));
+                    process::exit(exitcode::DATAERR);
+                }
+            }
+
+            File {
+                from: from.clone(),
+                to: String::from(to),
+                require: declaration
+                    .get("require")
+                    .map(|v| v.as_bool().unwrap())
+                    .unwrap_or(false),
+            }
+        }
+        _ => unreachable!(),
+    }
 }
