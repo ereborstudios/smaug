@@ -79,16 +79,13 @@ impl Dependency {
 
         match self.source.clone() {
             DependencySource::Git { repo, branch } => {
-                let clone = git::Clone {
-                    repo: repo.to_owned(),
-                    branch: branch.to_owned(),
-                };
+                let clone = git::Clone { repo, branch };
                 let destination = cache_dir.join(self.name.clone());
                 clone.clone(&destination);
 
                 destination
             }
-            DependencySource::Dir { path: dir } => dir.to_owned(),
+            DependencySource::Dir { path: dir } => dir,
             DependencySource::Url { location } => {
                 let source = cache_dir.join(format!("{}.zip", self.name.clone()));
                 let destination = cache_dir.join(self.name.clone());
