@@ -10,13 +10,15 @@ use toml::Value;
 #[derive(Debug, Clone, Deserialize)]
 struct RawConfig {
     pub project: Project,
+    pub package: Option<Package>,
     pub itch: Option<Itch>,
-    pub dependencies: Value,
+    pub dependencies: Option<Value>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct ProjectConfig {
     pub project: Project,
+    pub package: Option<Package>,
     pub itch: Option<Itch>,
     pub dependencies: Vec<Dependency>,
 }
@@ -32,7 +34,7 @@ pub struct Project {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Package {
-    pub requires: Vec<File>,
+    pub requires: Vec<String>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -63,21 +65,24 @@ impl ProjectConfig {
         let contents = read_to_string(path).unwrap();
 
         let raw: RawConfig = toml::from_str(&contents).unwrap();
-        println!("{:?}", raw);
         let config = convert_from_raw(&raw);
-        println!("{:?}", config);
 
         Some(config)
     }
 }
 
 fn convert_from_raw(raw: &RawConfig) -> ProjectConfig {
-    let dependencies = load_dependencies(&raw.dependencies);
+    let dependencies = raw
+        .dependencies
+        .clone()
+        .and_then(|value| load_dependencies(&value))
+        .unwrap_or_else(Vec::new);
 
     ProjectConfig {
         project: raw.project.clone(),
+        package: raw.package.clone(),
         itch: raw.itch.clone(),
-        dependencies: dependencies.unwrap_or_default(),
+        dependencies,
     }
 }
 

@@ -1,9 +1,10 @@
 use log::*;
 use std::fs;
+use std::io;
 use std::path::Path;
 use walkdir::WalkDir;
 
-pub(crate) fn copy_directory(source: &Path, destination: &Path) {
+pub(crate) fn copy_directory(source: &Path, destination: &Path) -> io::Result<()> {
     for entry in WalkDir::new(source) {
         let entry = entry.unwrap();
         let entry = entry.path();
@@ -19,13 +20,15 @@ pub(crate) fn copy_directory(source: &Path, destination: &Path) {
                 "Creating directory {}",
                 new_path.parent().and_then(|p| p.to_str()).unwrap()
             );
-            fs::create_dir_all(new_path.parent().unwrap()).unwrap();
+            fs::create_dir_all(new_path.parent().unwrap())?;
             trace!(
                 "Copying file from {} to {}",
                 entry.to_str().unwrap(),
                 new_path.to_str().unwrap()
             );
-            fs::copy(entry, new_path).unwrap();
+            fs::copy(entry, new_path)?;
         }
     }
+
+    Ok(())
 }

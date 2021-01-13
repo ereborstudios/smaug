@@ -4,6 +4,7 @@ use crate::project_config::Dependency as DependencyConfig;
 use crate::smaug;
 use crate::url;
 use log::*;
+use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -82,6 +83,10 @@ impl Dependency {
                 let destination = cache_dir.join(self.name.clone());
                 clone.clone(&destination);
 
+                let git_dir = destination.join(".git");
+                if git_dir.is_dir() {
+                    fs::remove_dir_all(destination.join(".git")).unwrap();
+                }
                 destination
             }
             DependencySource::Dir { path: dir } => dir,
