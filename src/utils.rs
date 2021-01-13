@@ -9,13 +9,17 @@ pub(crate) fn copy_directory(source: &Path, destination: &Path) -> io::Result<()
         let entry = entry.unwrap();
         let entry = entry.path();
 
+        println!("Entry: {}", entry.to_str().unwrap());
+        println!("Source: {}", source.to_str().unwrap());
+        println!("New Path: {}", entry.to_str().unwrap());
+
         let new_path = entry
             .to_str()
             .unwrap()
             .replace(source.to_str().unwrap(), destination.to_str().unwrap());
         let new_path = Path::new(&new_path);
 
-        if entry.is_file() {
+        if entry.is_file() && !entry.to_str().unwrap().contains("/.git/") {
             trace!(
                 "Creating directory {}",
                 new_path.parent().and_then(|p| p.to_str()).unwrap()

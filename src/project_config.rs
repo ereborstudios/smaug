@@ -62,6 +62,10 @@ pub struct File {
 
 impl ProjectConfig {
     pub(crate) fn load<P: AsRef<Path>>(path: &P) -> Option<ProjectConfig> {
+        trace!(
+            "Loading Smaug.toml from {}",
+            path.as_ref().to_str().unwrap()
+        );
         let contents = read_to_string(path).unwrap();
 
         let raw: RawConfig = toml::from_str(&contents).unwrap();

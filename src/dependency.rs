@@ -3,6 +3,7 @@ use crate::git;
 use crate::project_config::Dependency as DependencyConfig;
 use crate::smaug;
 use crate::url;
+use chrono::offset::Utc;
 use log::*;
 use std::fs;
 use std::path::Path;
@@ -31,6 +32,13 @@ pub enum DependencySource {
     },
 }
 
+#[derive(Debug)]
+pub struct DependencyCache {
+    pub dependency: Dependency,
+    pub path: PathBuf,
+    pub version: String,
+}
+
 impl Dependency {
     pub fn from_config(config: &DependencyConfig) -> Result<Dependency, String> {
         let name = config.name.as_ref().unwrap().clone();
@@ -46,7 +54,9 @@ impl Dependency {
             Ok(dependency)
         } else if config.dir.is_some() {
             let source = DependencySource::Dir {
-                path: Path::new(&config.dir.as_ref().unwrap()).to_path_buf(),
+                path: Path::new(&config.dir.as_ref().unwrap())
+                    .canonicalize()
+                    .unwrap(),
             };
 
             let dependency = Dependency { name, source };
@@ -73,37 +83,51 @@ impl Dependency {
         }
     }
 
-    pub fn cache(&self) -> PathBuf {
+    pub fn cache(&self) -> DependencyCache {
         let cache_dir = smaug::cache_dir();
         debug!("Cache directory {}", cache_dir.to_str().unwrap());
+        let mut destination = cache_dir.join(self.name.clone());
+        let version: String;
 
         match self.source.clone() {
             DependencySource::Git { repo, branch } => {
                 let clone = git::Clone { repo, branch };
-                let destination = cache_dir.join(self.name.clone());
-                clone.clone(&destination);
+                let repo = clone.clone(&destination);
+                version = repo
+                    .head()
+                    .and_then(|head| head.peel_to_commit())
+                    .map(|commit| commit.id())
+                    .ok()
+                    .map(|id| id.to_string())
+                    .unwrap();
 
                 let git_dir = destination.join(".git");
                 if git_dir.is_dir() {
                     fs::remove_dir_all(destination.join(".git")).unwrap();
                 }
-                destination
             }
-            DependencySource::Dir { path: dir } => dir,
+            DependencySource::Dir { path } => {
+                destination = path;
+                version = Utc::now().to_rfc3339();
+            }
             DependencySource::Url { location } => {
                 let source = cache_dir.join(format!("{}.zip", self.name.clone()));
-                let destination = cache_dir.join(self.name.clone());
                 url::download(&location, &source);
                 file::unzip(&source, &destination);
 
-                destination
+                version = Utc::now().to_rfc3339();
             }
             DependencySource::File { path: zip } => {
-                let destination = cache_dir.join(self.name.clone());
                 file::unzip(&zip, &destination);
 
-                destination
+                version = Utc::now().to_rfc3339();
             }
+        }
+
+        DependencyCache {
+            dependency: self.clone(),
+            path: destination,
+            version,
         }
     }
 }

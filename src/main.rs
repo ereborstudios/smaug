@@ -2,10 +2,10 @@ extern crate exitcode;
 
 mod commands;
 mod dependency;
-mod digest;
 mod dragonruby;
 mod file;
 mod git;
+mod lock;
 mod project_config;
 mod smaug;
 mod url;
