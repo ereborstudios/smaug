@@ -141,12 +141,17 @@ fn create_index(lock: &Lock, path: &Path) -> io::Result<()> {
     index.push_str("# It is recommended not to manually edit this file.\n\n");
 
     for package in lock.packages.iter() {
-        let destination = path.join("smaug").join(package.name.clone());
+        let vendor = path.join("smaug").join(package.name.clone());
 
-        if destination.exists() {
-            for require in package.requires.iter() {
-                let require_path = format!("smaug/{}/{}", package.name.clone(), require);
-                index.push_str(format!("require \"{}\"\n", require_path).as_str());
+        for require in package.requires.iter() {
+            let installed = path.join(require);
+            let vendored = vendor.join(require);
+
+            if installed.exists() {
+                index.push_str(format!("require \"{}\"\n", require).as_str());
+            } else if vendored.exists() {
+                let string = format!("smaug/{}/{}", package.name.clone(), require);
+                index.push_str(format!("require \"{}\"\n", string).as_str());
             }
         }
     }
