@@ -10,6 +10,7 @@ mod lock;
 mod project_config;
 mod smaug;
 mod url;
+mod utils;
 
 use clap::clap_app;
 use std::io;

@@ -1,10 +1,10 @@
 use crate::dragonruby;
+use crate::utils::copy_directory;
 use log::*;
 use std::env;
 use std::fs;
 use std::path::Path;
 use std::process;
-use walkdir::WalkDir;
 
 pub fn call(matches: &clap::ArgMatches) {
     dragonruby::ensure_installed();
@@ -53,31 +53,4 @@ pub fn call(matches: &clap::ArgMatches) {
 
     trace!("Removing directory {}", builds_directory.to_str().unwrap());
     fs::remove_dir_all(builds_directory).unwrap();
-}
-
-fn copy_directory(source: &Path, destination: &Path) {
-    for entry in WalkDir::new(source) {
-        let entry = entry.unwrap();
-        let entry = entry.path();
-
-        let new_path = entry
-            .to_str()
-            .unwrap()
-            .replace(source.to_str().unwrap(), destination.to_str().unwrap());
-        let new_path = Path::new(&new_path);
-
-        if entry.is_file() {
-            trace!(
-                "Creating directory {}",
-                new_path.parent().and_then(|p| p.to_str()).unwrap()
-            );
-            fs::create_dir_all(new_path.parent().unwrap()).unwrap();
-            trace!(
-                "Copying file from {} to {}",
-                entry.to_str().unwrap(),
-                new_path.to_str().unwrap()
-            );
-            fs::copy(entry, new_path).unwrap();
-        }
-    }
 }
