@@ -20,11 +20,7 @@ pub fn call(matches: &clap::ArgMatches) -> io::Result<()> {
 
     dragonruby::ensure_smaug_project(path);
 
-    if matches.is_present("package") {
-    } else {
-        install_from_config(&path)?;
-    }
-
+    install_from_config(&path)?;
     Ok(())
 }
 
