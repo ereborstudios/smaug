@@ -1,21 +1,27 @@
 use crate::smaug;
+use ::url::Url;
 use log::*;
-use std::fs;
+use serde::Deserialize;
+use std::fs::read_to_string;
 use std::path::Path;
-use std::path::PathBuf;
 use std::process;
 use toml::Value;
-use url::Url;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize)]
+struct RawConfig {
+    pub project: Project,
+    pub itch: Option<Itch>,
+    pub dependencies: Value,
+}
+
+#[derive(Debug, Clone, Deserialize)]
 pub struct ProjectConfig {
     pub project: Project,
     pub itch: Option<Itch>,
     pub dependencies: Vec<Dependency>,
-    pub files: Vec<File>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct Project {
     pub author: Option<String>,
     pub icon: Option<String>,
@@ -24,23 +30,28 @@ pub struct Project {
     pub version: Option<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize)]
+pub struct Package {
+    pub requires: Vec<File>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
 pub struct Itch {
     pub url: Option<String>,
     pub username: Option<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct Dependency {
     pub branch: Option<String>,
     pub dir: Option<String>,
     pub name: Option<String>,
     pub repo: Option<String>,
-    pub url: Option<Url>,
+    pub url: Option<String>,
     pub file: Option<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct File {
     pub from: String,
     pub to: String,
@@ -48,79 +59,26 @@ pub struct File {
 }
 
 impl ProjectConfig {
-    pub fn load(path: PathBuf) -> ProjectConfig {
-        let raw = fs::read_to_string(path.clone());
+    pub(crate) fn load<P: AsRef<Path>>(path: &P) -> Option<ProjectConfig> {
+        let contents = read_to_string(path).unwrap();
 
-        if raw.is_err() {
-            smaug::print_error(format!(
-                "Could not find configuration at {}.",
-                path.to_str().unwrap()
-            ));
-            process::exit(exitcode::DATAERR);
-        }
+        let raw: RawConfig = toml::from_str(&contents).unwrap();
+        println!("{:?}", raw);
+        let config = convert_from_raw(&raw);
+        println!("{:?}", config);
 
-        let file = raw.unwrap();
-        let value = file.parse::<Value>();
-
-        if value.is_err() {
-            smaug::print_error(format!("Error parsing {}.", path.to_str().unwrap()));
-            smaug::print_error(format!("{}", value.unwrap_err()));
-            process::exit(exitcode::DATAERR);
-        }
-
-        let config = value.unwrap();
-
-        let project = config.get("project").and_then(load_project).unwrap();
-        let itch = config.get("itch").and_then(load_itch);
-        let dependencies = config
-            .get("dependencies")
-            .and_then(load_dependencies)
-            .unwrap_or_default();
-
-        let files = config.get("files").and_then(load_files).unwrap_or_default();
-
-        ProjectConfig {
-            project,
-            itch,
-            dependencies,
-            files,
-        }
+        Some(config)
     }
 }
 
-fn load_project(value: &Value) -> Option<Project> {
-    let project = Project {
-        author: value
-            .get("author")
-            .map(|val| String::from(val.as_str().unwrap())),
-        icon: value
-            .get("icon")
-            .map(|val| String::from(val.as_str().unwrap())),
-        name: value
-            .get("name")
-            .map(|val| String::from(val.as_str().unwrap())),
-        url: value
-            .get("url")
-            .map(|val| String::from(val.as_str().unwrap())),
-        version: value
-            .get("version")
-            .map(|val| String::from(val.as_str().unwrap())),
-    };
+fn convert_from_raw(raw: &RawConfig) -> ProjectConfig {
+    let dependencies = load_dependencies(&raw.dependencies);
 
-    Some(project)
-}
-
-fn load_itch(value: &Value) -> Option<Itch> {
-    let itch = Itch {
-        url: value
-            .get("url")
-            .map(|url| String::from(url.as_str().unwrap())),
-        username: value
-            .get("username")
-            .map(|username| String::from(username.as_str().unwrap())),
-    };
-
-    Some(itch)
+    ProjectConfig {
+        project: raw.project.clone(),
+        itch: raw.itch.clone(),
+        dependencies: dependencies.unwrap_or_default(),
+    }
 }
 
 fn load_dependencies(value: &Value) -> Option<Vec<Dependency>> {
@@ -152,7 +110,7 @@ pub fn load_dependency_string(name: &str, value: &str) -> Dependency {
     let mut dir: Option<String> = None;
     let mut repo: Option<String> = None;
     let mut file: Option<String> = None;
-    let mut url: Option<Url> = None;
+    let mut url: Option<String> = None;
 
     match path.extension().and_then(|str| str.to_str()) {
         Some("git") => repo = Some(String::from(value)),
@@ -163,7 +121,7 @@ pub fn load_dependency_string(name: &str, value: &str) -> Dependency {
             if expanded.is_file() && zip_extensions::is_zip(&expanded.to_path_buf()) {
                 file = Some(String::from(expanded.to_str().unwrap()));
             } else if Url::parse(value).is_ok() {
-                url = Some(Url::parse(value).unwrap());
+                url = Some(String::from(value));
             }
         }
         _ => {
@@ -200,43 +158,6 @@ fn load_dependency_table(name: &str, value: &Value) -> Dependency {
             .map(|val| String::from(val.as_str().unwrap())),
         url: value
             .get("url")
-            .map(|val| Url::parse(val.as_str().unwrap()).unwrap()),
+            .map(|val| String::from(val.as_str().unwrap())),
     };
-}
-
-fn load_files(value: &Value) -> Option<Vec<File>> {
-    return value
-        .as_table()
-        .map(|files| files.into_iter().map(load_file).collect::<Vec<File>>());
-}
-
-fn load_file((from, declaration): (&String, &Value)) -> File {
-    match declaration {
-        Value::String(..) => File {
-            from: from.clone(),
-            to: String::from(declaration.as_str().unwrap()),
-            require: true,
-        },
-        Value::Table(..) => {
-            let to: &str;
-
-            match declaration.get("path") {
-                Some(val) => to = val.as_str().unwrap(),
-                None => {
-                    smaug::print_error(format!("File {} must include a path value.", from));
-                    process::exit(exitcode::DATAERR);
-                }
-            }
-
-            File {
-                from: from.clone(),
-                to: String::from(to),
-                require: declaration
-                    .get("require")
-                    .map(|v| v.as_bool().unwrap())
-                    .unwrap_or(false),
-            }
-        }
-        _ => unreachable!(),
-    }
 }

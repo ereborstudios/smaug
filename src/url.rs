@@ -3,9 +3,8 @@ use std::fs;
 use std::fs::File;
 use std::io;
 use std::path::Path;
-use url::Url;
 
-pub fn download(url: &Url, destination: &Path) {
+pub fn download(url: &String, destination: &Path) {
     if destination.is_file() {
         trace!("Removing file {}", destination.to_str().unwrap());
         fs::remove_file(destination).unwrap();

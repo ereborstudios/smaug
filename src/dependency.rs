@@ -3,7 +3,6 @@ use crate::git;
 use crate::project_config::Dependency as DependencyConfig;
 use crate::smaug;
 use crate::url;
-use ::url::Url;
 use log::*;
 use std::path::Path;
 use std::path::PathBuf;
@@ -27,7 +26,7 @@ pub enum DependencySource {
         branch: Option<String>,
     },
     Url {
-        location: Url,
+        location: String,
     },
 }
 
