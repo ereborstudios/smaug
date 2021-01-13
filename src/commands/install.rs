@@ -1,9 +1,11 @@
+use crate::digest;
 use crate::dragonruby;
 use crate::lock::Lock;
 use crate::project_config::ProjectConfig;
 use crate::smaug;
 use crate::utils::copy_directory;
 use log::*;
+use question::{Answer, Question};
 use std::env;
 use std::fs;
 use std::io;
@@ -31,7 +33,8 @@ fn install_from_config(path: &Path) -> io::Result<()> {
     let lock_file = path.join("Smaug.lock");
     debug!("Lock file: {:?}", lock_file);
     match Lock::load(&lock_file) {
-        Err(..) => {
+        Err(message) => {
+            debug!("{:?}", message);
             smaug::print_error("Could not parse Smaug.lock");
             exit(exitcode::DATAERR);
         }
@@ -66,6 +69,47 @@ fn install_packages(lock: &Lock, path: &Path) -> io::Result<()> {
                 destination.to_str().unwrap()
             );
             copy_directory(&source, &destination)?;
+
+            for (from, to) in package.installs.iter() {
+                let install_source = destination.join(from);
+                let install_destination = path.join(to);
+
+                trace!(
+                    "Installing file from {} to {}",
+                    install_source.display(),
+                    install_destination.display()
+                );
+                if install_destination.exists() {
+                    trace!(
+                        "Install file {} already exists",
+                        install_destination.display()
+                    );
+                    let source_digest = digest::file(&install_source).unwrap();
+                    let destination_digest = digest::file(&install_destination).unwrap();
+                    trace!("Source Digest: {}", source_digest);
+                    trace!("Destination Digest: {}", destination_digest);
+
+                    if source_digest != destination_digest {
+                        let question = format!(
+                            "{} has changed since the last install. Do you want to overwrite it?",
+                            install_destination.display()
+                        );
+
+                        let answer = Question::new(question.as_str())
+                            .default(Answer::YES)
+                            .show_defaults()
+                            .confirm();
+
+                        if answer == Answer::YES {
+                            fs::create_dir_all(install_destination.parent().unwrap())?;
+                            fs::copy(&install_source, &install_destination)?;
+                        }
+                    }
+                } else {
+                    fs::create_dir_all(install_destination.parent().unwrap())?;
+                    fs::copy(install_source, install_destination)?;
+                }
+            }
         }
     }
 

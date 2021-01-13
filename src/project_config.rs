@@ -2,6 +2,7 @@ use crate::smaug;
 use ::url::Url;
 use log::*;
 use serde::Deserialize;
+use std::collections::HashMap;
 use std::fs::read_to_string;
 use std::path::Path;
 use std::process;
@@ -35,6 +36,8 @@ pub struct Project {
 #[derive(Debug, Clone, Deserialize)]
 pub struct Package {
     pub requires: Vec<String>,
+    #[serde(default)]
+    pub installs: HashMap<String, String>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -51,13 +54,6 @@ pub struct Dependency {
     pub repo: Option<String>,
     pub url: Option<String>,
     pub file: Option<String>,
-}
-
-#[derive(Debug, Clone, Deserialize)]
-pub struct File {
-    pub from: String,
-    pub to: String,
-    pub require: bool,
 }
 
 impl ProjectConfig {

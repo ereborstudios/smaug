@@ -24,6 +24,9 @@ pub(crate) struct PackageLock {
     pub requires: Vec<String>,
     #[serde(skip_serializing)]
     pub cache: Option<PathBuf>,
+    #[serde(skip_serializing)]
+    #[serde(default)]
+    pub installs: HashMap<String, String>,
 }
 
 #[derive(Debug)]
@@ -41,7 +44,6 @@ impl Lock {
             let contents = fs::read_to_string(file).unwrap();
             match toml::from_str(&contents) {
                 Err(message) => {
-                    println!("{:?}", message);
                     return Err(LockError::ParsingFailed(message.to_string()));
                 }
                 Ok(lock) => return Ok(lock),
@@ -80,6 +82,7 @@ impl Lock {
                     version: package.version.clone(),
                     requires: package.requires.clone(),
                     cache: package.cache.clone(),
+                    installs: package.installs.clone(),
                 };
                 packages.push(package_lock);
             }
@@ -104,8 +107,9 @@ impl Lock {
             let package_lock = PackageLock {
                 name: package_name,
                 version: cache.version.clone(),
-                requires: package_config.package.unwrap().requires,
+                requires: package_config.package.clone().unwrap().requires,
                 cache: Some(cache.path.clone()),
+                installs: package_config.package.clone().unwrap().installs,
             };
             packages.push(package_lock);
         }

@@ -9,10 +9,6 @@ pub(crate) fn copy_directory(source: &Path, destination: &Path) -> io::Result<()
         let entry = entry.unwrap();
         let entry = entry.path();
 
-        println!("Entry: {}", entry.to_str().unwrap());
-        println!("Source: {}", source.to_str().unwrap());
-        println!("New Path: {}", entry.to_str().unwrap());
-
         let new_path = entry
             .to_str()
             .unwrap()

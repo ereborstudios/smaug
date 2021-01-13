@@ -2,6 +2,7 @@ extern crate exitcode;
 
 mod commands;
 mod dependency;
+mod digest;
 mod dragonruby;
 mod file;
 mod git;
