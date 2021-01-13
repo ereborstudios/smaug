@@ -81,10 +81,10 @@ fn main() -> io::Result<()> {
                 _ => unreachable!(),
             }
         }
-        Some("new") => commands::new::call(matches.subcommand_matches("new").unwrap()),
+        Some("new") => commands::new::call(matches.subcommand_matches("new").unwrap())?,
         Some("run") => commands::run::call(matches.subcommand_matches("run").unwrap()),
-        Some("build") => commands::build::call(matches.subcommand_matches("build").unwrap()),
-        Some("publish") => commands::publish::call(matches.subcommand_matches("publish").unwrap()),
+        Some("build") => commands::build::call(matches.subcommand_matches("build").unwrap())?,
+        Some("publish") => commands::publish::call(matches.subcommand_matches("publish").unwrap())?,
         Some("init") => commands::init::call(matches.subcommand_matches("init").unwrap()),
         Some("package") => commands::package::call(matches.subcommand_matches("package").unwrap()),
         Some("install") => commands::install::call(matches.subcommand_matches("install").unwrap())?,

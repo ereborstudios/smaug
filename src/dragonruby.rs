@@ -1,7 +1,6 @@
 use crate::project_config::ProjectConfig;
 use crate::smaug;
 use log::*;
-use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process;
@@ -54,7 +53,7 @@ pub fn generate_metadata(project: &Path) {
         "Loading Smaug Configuration from {}",
         config_path.to_str().unwrap()
     );
-    let config = ProjectConfig::load(&config_path).unwrap();
+    ProjectConfig::load(&config_path).unwrap();
     // debug!("Smaug Configuration: {:?}", config);
     // let metadata_dir = project.join("metadata");
 

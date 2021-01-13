@@ -3,10 +3,11 @@ use crate::utils::copy_directory;
 use log::*;
 use std::env;
 use std::fs;
+use std::io;
 use std::path::Path;
 use std::process;
 
-pub fn call(matches: &clap::ArgMatches) {
+pub fn call(matches: &clap::ArgMatches) -> io::Result<()> {
     dragonruby::ensure_installed();
 
     let current_directory = env::current_dir().unwrap();
@@ -26,7 +27,7 @@ pub fn call(matches: &clap::ArgMatches) {
     );
 
     let build_directory = dragonruby_directory.join(path.file_name().unwrap());
-    copy_directory(&path, &build_directory);
+    copy_directory(&path, &build_directory)?;
 
     let bin = dragonruby_directory.join("dragonruby-publish");
 
@@ -46,12 +47,14 @@ pub fn call(matches: &clap::ArgMatches) {
         .unwrap();
 
     trace!("Removing directory {}", build_directory.to_str().unwrap());
-    fs::remove_dir_all(build_directory).unwrap();
+    fs::remove_dir_all(build_directory)?;
 
     let builds_directory = dragonruby_directory.join("builds");
     let new_builds_directory = path.join("builds");
-    copy_directory(&builds_directory, &new_builds_directory);
+    copy_directory(&builds_directory, &new_builds_directory)?;
 
     trace!("Removing directory {}", builds_directory.to_str().unwrap());
-    fs::remove_dir_all(builds_directory).unwrap();
+    fs::remove_dir_all(builds_directory)?;
+
+    Ok(())
 }

@@ -4,10 +4,11 @@ use crate::smaug;
 use crate::utils::copy_directory;
 use log::*;
 use std::fs;
+use std::io;
 use std::path::Path;
 use std::process;
 
-pub fn call(matches: &clap::ArgMatches) {
+pub fn call(matches: &clap::ArgMatches) -> io::Result<()> {
     dragonruby::ensure_installed();
 
     let path = matches.value_of("PATH").unwrap();
@@ -20,11 +21,11 @@ pub fn call(matches: &clap::ArgMatches) {
     }
 
     trace!("Creating directory {}", destination.to_str().unwrap());
-    fs::create_dir(destination).unwrap();
+    fs::create_dir(destination)?;
 
     let template = dragonruby::dragonruby_directory().join("mygame");
     debug!("Template Directory: {}", template.to_str().unwrap());
-    copy_directory(&template, &destination);
+    copy_directory(&template, &destination)?;
 
     init::generate_config(&destination.join("Smaug.toml").as_path());
 
@@ -36,4 +37,6 @@ pub fn call(matches: &clap::ArgMatches) {
         .unwrap();
 
     init::generate_gitignore(&destination);
+
+    Ok(())
 }
