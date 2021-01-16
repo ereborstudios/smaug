@@ -6,7 +6,7 @@ use walkdir::WalkDir;
 
 pub(crate) fn copy_directory(source: &Path, destination: &Path) -> io::Result<()> {
     for entry in WalkDir::new(source) {
-        let entry = entry.unwrap();
+        let entry = entry.expect("Could not find file");
         let entry = entry.path();
 
         let new_path = entry

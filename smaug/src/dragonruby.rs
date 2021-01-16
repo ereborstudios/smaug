@@ -1,4 +1,6 @@
 use crate::smaug;
+use derive_more::Display;
+use derive_more::Error;
 use log::*;
 use semver::Version as SemVer;
 use std::fmt;
@@ -25,9 +27,10 @@ pub struct DragonRuby {
     pub version: Version,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Error, Display)]
 pub enum DragonRubyError {
-    DragonRubyNotFound(PathBuf),
+    #[display(fmt = "Could not find a valid DragonRuby at {}", "path.display()")]
+    DragonRubyNotFound { path: PathBuf },
 }
 
 type DragonRubyResult = Result<DragonRuby, DragonRubyError>;
@@ -40,9 +43,9 @@ pub fn new<P: AsRef<Path>>(path: &P) -> DragonRubyResult {
     } else if zip_extensions::is_zip(&dragonruby_path.to_path_buf()) {
         parse_dragonruby_zip(&dragonruby_path)
     } else {
-        Err(DragonRubyError::DragonRubyNotFound(
-            dragonruby_path.to_path_buf(),
-        ))
+        Err(DragonRubyError::DragonRubyNotFound {
+            path: dragonruby_path.to_path_buf(),
+        })
     }
 }
 
@@ -50,8 +53,14 @@ impl DragonRuby {
     pub fn install_dir(&self) -> PathBuf {
         let location = smaug::data_dir().join("dragonruby");
         match self.version.edition {
-            Edition::Pro => location.join(format!("pro-{}", self.version.version)),
-            Edition::Standard => location.join(format!("{}", self.version.version)),
+            Edition::Pro => location.join(format!(
+                "pro-{}.{}",
+                self.version.version.major, self.version.version.minor
+            )),
+            Edition::Standard => location.join(format!(
+                "{}.{}",
+                self.version.version.major, self.version.version.minor
+            )),
         }
     }
 }
@@ -75,7 +84,12 @@ pub fn list_installed() -> io::Result<Vec<DragonRuby>> {
 
 fn parse_dragonruby_zip(path: &Path) -> DragonRubyResult {
     let cache = smaug::cache_dir();
+    trace!("Unzipping DragonRuby from {}", path.display());
+    if cache.is_dir() {
+        fs::remove_dir_all(cache.clone()).expect("Couldn't clear cache");
+    }
     zip_extensions::zip_extract(&path.to_path_buf(), &cache).expect("Could not extract zip");
+    trace!("Unzipped DragonRuby to {}", cache.display());
     let mut dir = fs::read_dir(cache.as_path()).expect("Could not read from cache");
     let unzipped_to = dir
         .next()
@@ -86,7 +100,14 @@ fn parse_dragonruby_zip(path: &Path) -> DragonRubyResult {
 }
 
 fn parse_dragonruby_dir(path: &Path) -> DragonRubyResult {
+    trace!("Parsing DragonRuby directory at {}", path.display());
     let edition: Edition;
+
+    if !path.is_dir() {
+        return Err(DragonRubyError::DragonRubyNotFound {
+            path: path.to_path_buf(),
+        });
+    };
 
     let dragonruby_bin = path.join("dragonruby");
     debug!("DragonRuby bin {}", dragonruby_bin.display());
@@ -96,7 +117,9 @@ fn parse_dragonruby_dir(path: &Path) -> DragonRubyResult {
     debug!("Changelog {}", changelog.display());
 
     if !dragonruby_bin.exists() || !changelog.exists() {
-        return Err(DragonRubyError::DragonRubyNotFound(path.to_path_buf()));
+        return Err(DragonRubyError::DragonRubyNotFound {
+            path: path.to_path_buf(),
+        });
     };
 
     let changelog_contents =

@@ -39,6 +39,11 @@ impl Command for Install {
 fn install(dr: &DragonRuby) -> io::Result<DragonRuby> {
     let source = dr.path.clone();
     let destination = dr.install_dir();
+    trace!(
+        "Copying DragonRuby from {} to {}",
+        source.display(),
+        destination.display()
+    );
 
     copy_directory(&source, &destination)?;
 

@@ -26,6 +26,10 @@ fn main() {
                 (about: "Installs DragonRuby.")
                 (@arg FILE: +required "The location of the DragonRuby Game Toolkit zip file.")
             )
+            (@subcommand uninstall =>
+                (about: "Uninstalls DragonRuby.")
+                (@arg VERSION: +required "The version of DragonRuby to uninstall.")
+            )
             (@subcommand list =>
                 (about: "Lists installed DragonRuby versions.")
             )
