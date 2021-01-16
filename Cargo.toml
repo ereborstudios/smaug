@@ -1,0 +1,6 @@
+[workspace]
+members = [
+	"smaug",
+	"cli",
+	"registry"
+]
