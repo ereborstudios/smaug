@@ -7,7 +7,7 @@ mod util;
 use crate::command::Command;
 use crate::commands::package::Package;
 use clap::clap_app;
-use commands::{dragonruby::DragonRuby, init::Init};
+use commands::{dragonruby::DragonRuby, init::Init, new::New};
 use log::*;
 
 fn main() {
@@ -51,10 +51,6 @@ fn main() {
             (about: "Initializes an existing project as a Smaug project.")
             (@arg PATH: "The path to your project. Defaults to the current directory.")
         )
-        (@subcommand package =>
-            (about: "Initializes an existing library as a Smaug package.")
-            (@arg PATH: "The path to your package. Defaults to the current directory.")
-        )
         (@subcommand run =>
             (about: "Runs your DragonRuby project.")
             (@arg PATH: "The path to your project. Defaults to the current directory.")
@@ -79,6 +75,7 @@ fn main() {
     let command: Box<dyn Command> = match matches.subcommand_name() {
         Some("dragonruby") => Box::new(DragonRuby),
         Some("init") => Box::new(Init),
+        Some("new") => Box::new(New),
         Some("package") => Box::new(Package),
         _ => unreachable!(),
     };
