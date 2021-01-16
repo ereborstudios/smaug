@@ -3,25 +3,33 @@ use derive_more::Display;
 use derive_more::Error;
 use log::*;
 use semver::Version as SemVer;
-use std::fmt;
 use std::fs;
 use std::io;
 use std::path::Path;
 use std::path::PathBuf;
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Display)]
 pub enum Edition {
+    #[display(fmt = "")]
     Standard,
+    #[display(fmt = "Pro")]
     Pro,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Display)]
+#[display(
+    fmt = "DragonRuby {} {}.{}",
+    "edition",
+    "version.major",
+    "version.minor"
+)]
 pub struct Version {
     pub edition: Edition,
     pub version: SemVer,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Display)]
+#[display(fmt = "{}", "version")]
 pub struct DragonRuby {
     pub path: PathBuf,
     pub version: Version,
@@ -31,6 +39,10 @@ pub struct DragonRuby {
 pub enum DragonRubyError {
     #[display(fmt = "Could not find a valid DragonRuby at {}", "path.display()")]
     DragonRubyNotFound { path: PathBuf },
+    #[display(
+        fmt = "There is no version of DragonRuby installed.\nInstall with `smaug dragonruby install`."
+    )]
+    DragonRubyNotInstalled,
 }
 
 type DragonRubyResult = Result<DragonRuby, DragonRubyError>;
@@ -61,6 +73,24 @@ impl DragonRuby {
                 "{}.{}",
                 self.version.version.major, self.version.version.minor
             )),
+        }
+    }
+}
+
+pub fn latest() -> DragonRubyResult {
+    let list = list_installed();
+
+    match list {
+        Err(..) => Err(DragonRubyError::DragonRubyNotInstalled),
+        Ok(mut versions) => {
+            if versions.is_empty() {
+                Err(DragonRubyError::DragonRubyNotInstalled)
+            } else {
+                versions.sort_by(|a, b| a.version.partial_cmp(&b.version).unwrap());
+                let latest = versions.last().unwrap();
+
+                Ok((*latest).clone())
+            }
         }
     }
 }
@@ -152,23 +182,4 @@ fn parse_dragonruby_dir(path: &Path) -> DragonRubyResult {
     };
 
     Ok(dragonruby)
-}
-
-impl fmt::Display for Version {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        match self.edition {
-            Edition::Pro => write!(
-                fmt,
-                "DragonRuby Pro {}.{}",
-                self.version.major, self.version.minor
-            )?,
-            Edition::Standard => write!(
-                fmt,
-                "DragonRuby {}.{}",
-                self.version.major, self.version.minor
-            )?,
-        }
-
-        Ok(())
-    }
 }

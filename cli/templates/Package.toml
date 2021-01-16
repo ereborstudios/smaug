@@ -1,0 +1,16 @@
+[project]
+name = "TODO: Package Name"
+author = "TODO: Author Name"
+version = "0.1.0"
+url = "TODO: Package Website"
+
+[package]
+# Which files do you want to be automatically required from your package.
+# requires = ["lib/library.rb"]
+
+[package.installs]
+
+# Example
+#
+# <from> = <to>
+# "lib/library.rb" = "app/lib/library.rb"

@@ -1,0 +1,26 @@
+[project]
+name = "{ name }"
+version = "0.1.0"
+author = "TODO: Author Name"
+icon = "metadata/icon.png"
+url = "TODO: Project Website"
+
+[dragonruby]
+version = "{ version }"
+edition = "{ edition }"
+
+[itch]
+# The Project URL you set when you created the game on Itch.io. https://my-username.itch.io/my-game.
+# This will also be the name of your build files, so fill it out even if you aren't uploading to Itch.io.
+url = "todo-change-me"
+# Your username on Itch.io.
+username = "todo-change-me"
+
+[[dependencies]]
+
+# Dependency Examples
+# draco = "https://github.com/guitsaru/draco.git"
+# branch = \{ repo = "https://github.com/guitsaru/draco.git", branch = "main" \}
+# local = "../dependency/"
+# zipped = "../dependency.zip"
+# download = "https://example.com/download.zip"

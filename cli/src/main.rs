@@ -6,7 +6,8 @@ mod util;
 
 use crate::command::Command;
 use clap::clap_app;
-use commands::dragonruby::DragonRuby;
+use commands::{dragonruby::DragonRuby, init};
+use init::Init;
 use log::*;
 
 fn main() {
@@ -69,6 +70,7 @@ fn main() {
 
     let command: Box<dyn Command> = match matches.subcommand_name() {
         Some("dragonruby") => Box::new(DragonRuby),
+        Some("init") => Box::new(Init),
         _ => unreachable!(),
     };
 
