@@ -1,9 +1,11 @@
 pub mod install;
+pub mod list;
 
 use crate::command::Command;
 use crate::command::CommandResult;
 use clap::ArgMatches;
 use install::Install;
+use list::List;
 use log::*;
 
 #[derive(Debug)]
@@ -15,6 +17,7 @@ impl Command for DragonRuby {
 
         let command: Box<dyn Command> = match matches.subcommand_name() {
             Some("install") => Box::new(Install),
+            Some("list") => Box::new(List),
             _ => unreachable!(),
         };
 

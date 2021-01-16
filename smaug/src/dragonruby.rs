@@ -3,6 +3,7 @@ use log::*;
 use semver::Version as SemVer;
 use std::fmt;
 use std::fs;
+use std::io;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -49,10 +50,27 @@ impl DragonRuby {
     pub fn install_dir(&self) -> PathBuf {
         let location = smaug::data_dir().join("dragonruby");
         match self.version.edition {
-            Edition::Pro => location.join(format!("{}-pro", self.version.version)),
+            Edition::Pro => location.join(format!("pro-{}", self.version.version)),
             Edition::Standard => location.join(format!("{}", self.version.version)),
         }
     }
+}
+
+pub fn list_installed() -> io::Result<Vec<DragonRuby>> {
+    let location = smaug::data_dir().join("dragonruby");
+    fs::create_dir_all(location.as_path())?;
+
+    let folders = fs::read_dir(location).expect("DragonRuby install folder not found.");
+    let versions: Vec<DragonRuby> = folders
+        .map(|folder| {
+            let path = folder.expect("Invalid folder");
+            parse_dragonruby_dir(&path.path())
+        })
+        .filter(|path| path.is_ok())
+        .map(|path| path.unwrap())
+        .collect();
+
+    Ok(versions)
 }
 
 fn parse_dragonruby_zip(path: &Path) -> DragonRubyResult {
