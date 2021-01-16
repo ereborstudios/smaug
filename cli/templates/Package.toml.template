@@ -1,8 +1,12 @@
 [project]
-name = "TODO: Package Name"
+name = "{ name }"
 author = "TODO: Author Name"
 version = "0.1.0"
 url = "TODO: Package Website"
+
+[dragonruby]
+version = "{ version }"
+edition = "{ edition }"
 
 [package]
 # Which files do you want to be automatically required from your package.

@@ -5,9 +5,9 @@ mod commands;
 mod util;
 
 use crate::command::Command;
+use crate::commands::package::Package;
 use clap::clap_app;
-use commands::{dragonruby::DragonRuby, init};
-use init::Init;
+use commands::{dragonruby::DragonRuby, init::Init};
 use log::*;
 
 fn main() {
@@ -33,6 +33,14 @@ fn main() {
             )
             (@subcommand list =>
                 (about: "Lists installed DragonRuby versions.")
+            )
+        )
+        (@subcommand package =>
+            (about: "Manages your DragonRuby package.")
+            (setting: clap::AppSettings::ArgRequiredElseHelp)
+            (@subcommand init =>
+                (about: "Initializes an existing package as a Smaug project.")
+                (@arg PATH: "The path to your package. Defaults to the current directory.")
             )
         )
         (@subcommand new =>
@@ -71,6 +79,7 @@ fn main() {
     let command: Box<dyn Command> = match matches.subcommand_name() {
         Some("dragonruby") => Box::new(DragonRuby),
         Some("init") => Box::new(Init),
+        Some("package") => Box::new(Package),
         _ => unreachable!(),
     };
 
