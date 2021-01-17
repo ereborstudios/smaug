@@ -1,8 +1,9 @@
-use crate::smaug;
+use crate::{config::Config, smaug};
 use derive_more::Display;
 use derive_more::Error;
 use log::*;
 use semver::Version as SemVer;
+use semver::VersionReq;
 use std::fs;
 use std::io;
 use std::path::Path;
@@ -92,6 +93,27 @@ pub fn latest() -> DragonRubyResult {
                 Ok((*latest).clone())
             }
         }
+    }
+}
+
+pub fn configured_version(config: &Config) -> Option<DragonRuby> {
+    let version = VersionReq::parse(config.dragonruby.version.as_str())
+        .expect("Not a valid DragonRuby version.");
+    let edition = if config.dragonruby.edition == "pro" {
+        Edition::Pro
+    } else {
+        Edition::Standard
+    };
+
+    let mut installed = list_installed().expect("Could not list installed.");
+    installed.sort_by(|a, b| a.version.partial_cmp(&b.version).unwrap());
+    let matched = installed
+        .iter()
+        .find(|v| version.matches(&v.version.version) && v.version.edition >= edition);
+
+    match matched {
+        Some(dragonruby) => Some(dragonruby.clone()),
+        None => None,
     }
 }
 

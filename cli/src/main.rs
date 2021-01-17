@@ -2,10 +2,12 @@ extern crate derive_more;
 
 mod command;
 mod commands;
+mod game_metadata;
 mod util;
 
 use crate::command::Command;
 use crate::commands::package::Package;
+use crate::commands::run::Run;
 use clap::clap_app;
 use commands::{dragonruby::DragonRuby, init::Init, new::New};
 use log::*;
@@ -77,6 +79,7 @@ fn main() {
         Some("init") => Box::new(Init),
         Some("new") => Box::new(New),
         Some("package") => Box::new(Package),
+        Some("run") => Box::new(Run),
         _ => unreachable!(),
     };
 

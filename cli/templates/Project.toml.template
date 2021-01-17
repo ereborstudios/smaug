@@ -1,9 +1,11 @@
 [project]
+# The name of your game's executable. This should only contain a-z, A-Z, 0-9, _ or -.
 name = "{ name }"
+# The game's title. This will show up in the tile bar of your executable.
+title = "{ name }"
 version = "0.1.0"
-author = "TODO: Author Name"
+authors = ["TODO: My Name"]
 icon = "metadata/icon.png"
-url = "TODO: Project Website"
 
 [dragonruby]
 version = "{ version }"
@@ -16,7 +18,7 @@ url = "todo-change-me"
 # Your username on Itch.io.
 username = "todo-change-me"
 
-[[dependencies]]
+[dependencies]
 
 # Dependency Examples
 # draco = "https://github.com/guitsaru/draco.git"
