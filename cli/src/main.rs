@@ -9,7 +9,7 @@ use crate::command::Command;
 use crate::commands::package::Package;
 use crate::commands::run::Run;
 use clap::clap_app;
-use commands::{build::Build, dragonruby::DragonRuby, init::Init, new::New};
+use commands::{build::Build, dragonruby::DragonRuby, init::Init, new::New, publish::Publish};
 use log::*;
 
 fn main() {
@@ -80,6 +80,7 @@ fn main() {
         Some("init") => Box::new(Init),
         Some("new") => Box::new(New),
         Some("package") => Box::new(Package),
+        Some("publish") => Box::new(Publish),
         Some("run") => Box::new(Run),
         _ => unreachable!(),
     };
