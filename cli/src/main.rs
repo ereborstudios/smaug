@@ -9,7 +9,7 @@ use crate::command::Command;
 use crate::commands::package::Package;
 use crate::commands::run::Run;
 use clap::clap_app;
-use commands::{dragonruby::DragonRuby, init::Init, new::New};
+use commands::{build::Build, dragonruby::DragonRuby, init::Init, new::New};
 use log::*;
 
 fn main() {
@@ -75,6 +75,7 @@ fn main() {
     start_log(&matches);
 
     let command: Box<dyn Command> = match matches.subcommand_name() {
+        Some("build") => Box::new(Build),
         Some("dragonruby") => Box::new(DragonRuby),
         Some("init") => Box::new(Init),
         Some("new") => Box::new(New),

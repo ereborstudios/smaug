@@ -19,7 +19,7 @@ pub fn from_config(config: &Config) -> GameMetadata {
         .clone()
         .expect("Smaug.toml is not a project configuration");
     GameMetadata {
-        devid: project.authors.join(" "),
+        devid: "dragonrider".to_string(),
         devtitle: project.authors.join(" "),
         gameid: project.name,
         gametitle: project.title,
