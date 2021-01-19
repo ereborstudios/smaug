@@ -1,10 +1,11 @@
+use crate::command::CommandResult;
 use crate::{command::Command, game_metadata};
-use crate::{command::CommandResult, util::dir::copy_directory};
 use clap::ArgMatches;
 use derive_more::Display;
 use derive_more::Error;
 use log::*;
 use smaug::dragonruby;
+use smaug::util::dir::copy_directory;
 use std::env;
 use std::path::Path;
 use std::process;
@@ -50,7 +51,8 @@ impl Command for Publish {
                 let bin_dir = dragonruby.install_dir();
                 let build_dir = bin_dir.join(path.file_name().unwrap());
 
-                copy_directory(&path, &build_dir).expect("Could not copy to build directory.");
+                copy_directory(&path, &build_dir.as_path())
+                    .expect("Could not copy to build directory.");
 
                 debug!("DragonRuby Directory: {}", bin_dir.to_str().unwrap());
                 let bin = bin_dir.join("dragonruby-publish");

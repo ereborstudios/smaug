@@ -15,6 +15,5 @@ log = "0.4"
 tinytemplate = "1.1"
 serde = { version = "1.0", features = ["derive"] }
 stderrlog = "0.5"
-walkdir = "2"
 zip = "0.5"
 zip-extensions = "0.6.0"

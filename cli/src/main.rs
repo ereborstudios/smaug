@@ -3,12 +3,12 @@ extern crate derive_more;
 mod command;
 mod commands;
 mod game_metadata;
-mod util;
 
 use crate::command::Command;
 use crate::commands::package::Package;
 use crate::commands::run::Run;
 use clap::clap_app;
+use commands::install::Install;
 use commands::{build::Build, dragonruby::DragonRuby, init::Init, new::New, publish::Publish};
 use log::*;
 
@@ -78,6 +78,7 @@ fn main() {
         Some("build") => Box::new(Build),
         Some("dragonruby") => Box::new(DragonRuby),
         Some("init") => Box::new(Init),
+        Some("install") => Box::new(Install),
         Some("new") => Box::new(New),
         Some("package") => Box::new(Package),
         Some("publish") => Box::new(Publish),

@@ -1,5 +1,6 @@
 use derive_more::Display;
 use derive_more::Error;
+use log::*;
 use semver::VersionReq;
 use serde::de;
 use serde::de::Deserializer;
@@ -13,11 +14,20 @@ use std::path::PathBuf;
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
+    pub package: Option<Package>,
     pub project: Option<Project>,
     pub dragonruby: DragonRuby,
     pub itch: Option<Itch>,
     #[serde(default)]
     pub dependencies: HashMap<String, DependencyOptions>,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct Package {
+    pub name: String,
+    pub title: String,
+    pub version: String,
+    pub authors: Vec<String>,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -52,6 +62,8 @@ pub enum DependencyOptions {
     Git {
         branch: Option<String>,
         repo: String,
+        rev: Option<String>,
+        tag: Option<String>,
     },
     Registry {
         version: VersionReq,
@@ -77,20 +89,16 @@ pub enum Error {
 }
 
 pub fn load<P: AsRef<Path>>(path: &P) -> Result<Config, Error> {
-    let path = path.as_ref();
+    let path = std::fs::canonicalize(path.as_ref()).unwrap();
     if !path.is_file() {
-        return Err(Error::FileNotFound {
-            path: path.to_path_buf(),
-        });
+        return Err(Error::FileNotFound { path });
     }
 
-    let contents = std::fs::read_to_string(path).expect("Could not read Smaug.toml");
+    std::env::set_current_dir(&path.parent().unwrap()).unwrap();
+    let contents = std::fs::read_to_string(path.clone()).expect("Could not read Smaug.toml");
     match toml::from_str(&contents) {
         Ok(config) => Ok(config),
-        Err(err) => Err(Error::ParseError {
-            path: path.to_path_buf(),
-            parent: err,
-        }),
+        Err(err) => Err(Error::ParseError { path, parent: err }),
     }
 }
 impl<'de> Deserialize<'de> for DependencyOptions {
@@ -111,13 +119,25 @@ impl<'de> Deserialize<'de> for DependencyOptions {
             where
                 E: de::Error,
             {
-                let path = Path::new(value);
+                let path = if let Ok(expanded) = shellexpand::full(&value) {
+                    let expanded = expanded.clone();
+                    let expanded_string = expanded.to_string();
+                    debug!("Expanded Path: {}", expanded_string);
+                    let pb = std::env::current_dir();
+                    debug!("{:?}", pb);
+                    PathBuf::from(expanded_string)
+                } else {
+                    PathBuf::from(value)
+                };
+
                 if let Ok(version) = VersionReq::parse(value) {
                     Ok(DependencyOptions::Registry { version })
                 } else if let Some("git") = path.extension().and_then(|str| str.to_str()) {
                     Ok(DependencyOptions::Git {
                         repo: value.to_string(),
                         branch: None,
+                        rev: None,
+                        tag: None,
                     })
                 } else if path.is_dir() {
                     Ok(DependencyOptions::Dir {
@@ -145,6 +165,8 @@ impl<'de> Deserialize<'de> for DependencyOptions {
             {
                 let mut repo: Option<String> = None;
                 let mut branch: Option<String> = None;
+                let mut tag: Option<String> = None;
+                let mut rev: Option<String> = None;
                 let mut dir: Option<String> = None;
                 let mut file: Option<String> = None;
                 let mut version: Option<String> = None;
@@ -154,6 +176,8 @@ impl<'de> Deserialize<'de> for DependencyOptions {
                     match key {
                         "branch" => branch = Some(map.next_value()?),
                         "repo" => repo = Some(map.next_value()?),
+                        "tag" => tag = Some(map.next_value()?),
+                        "rev" => rev = Some(map.next_value()?),
                         "dir" => dir = Some(map.next_value()?),
                         "file" => file = Some(map.next_value()?),
                         "version" => version = Some(map.next_value()?),
@@ -166,6 +190,8 @@ impl<'de> Deserialize<'de> for DependencyOptions {
                     Ok(DependencyOptions::Git {
                         repo: repo.expect("No repo"),
                         branch,
+                        tag,
+                        rev,
                     })
                 } else if dir.is_some() {
                     Ok(DependencyOptions::Dir {

@@ -4,16 +4,12 @@ use std::io;
 use std::path::Path;
 use walkdir::WalkDir;
 
-pub(crate) fn copy_directory(source: &Path, destination: &Path) -> io::Result<()> {
+pub fn copy_directory<P: AsRef<Path>>(source: &P, destination: &P) -> io::Result<()> {
     for entry in WalkDir::new(source) {
         let entry = entry.expect("Could not find file");
         let entry = entry.path();
-
-        let new_path = entry
-            .to_str()
-            .unwrap()
-            .replace(source.to_str().unwrap(), destination.to_str().unwrap());
-        let new_path = Path::new(&new_path);
+        let relative = entry.strip_prefix(source.as_ref()).unwrap();
+        let new_path = destination.as_ref().join(relative);
 
         if entry.is_file() && !entry.to_str().unwrap().contains("/.git/") {
             trace!(

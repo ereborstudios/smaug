@@ -24,7 +24,7 @@ impl Command for New {
         let path = Path::new(directory);
 
         let source = latest.install_dir().join("mygame");
-        crate::util::dir::copy_directory(&source, &path)
+        smaug::util::dir::copy_directory(&source, &path.to_path_buf())
             .expect("Installed DragonRuby doesn't have mygame directory.");
 
         let gitignore = include_str!("../../templates/gitignore");

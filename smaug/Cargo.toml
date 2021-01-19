@@ -9,11 +9,14 @@ edition = "2018"
 [dependencies]
 derive_more = "0.99.11"
 directories = "3.0.1"
+git2 = "0.13"
 log = "0.4"
 regex = "1"
 semver = { version = "0.11", features = ["serde"] }
 serde = { version = "1.0", features = ["derive"] }
+shellexpand = "2.1"
 toml = { version = "0.5.8", features = ["preserve_order"] }
 url = "2.2.0"
+walkdir = "2"
 zip = "0.5"
 zip-extensions = "0.6.0"
