@@ -25,6 +25,7 @@ pub struct Config {
 #[derive(Clone, Debug, Deserialize)]
 pub struct Package {
     pub name: String,
+    pub description: Option<String>,
     pub version: String,
     pub authors: Vec<String>,
     #[serde(default)]
