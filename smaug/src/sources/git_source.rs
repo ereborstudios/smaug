@@ -1,4 +1,5 @@
 use crate::dependency::Dependency;
+use crate::registry::Registry;
 use crate::source::Source;
 use crate::sources::dir_source::DirSource;
 use git2::build::CheckoutBuilder;
@@ -8,6 +9,7 @@ use git2::Oid;
 use log::*;
 use std::path::PathBuf;
 
+#[derive(Clone, Debug)]
 pub struct GitSource {
     pub repo: String,
     pub branch: Option<String>,
@@ -16,7 +18,12 @@ pub struct GitSource {
 }
 
 impl Source for GitSource {
-    fn install(&self, dependency: &Dependency, path: &PathBuf) -> std::io::Result<()> {
+    fn install(
+        &self,
+        registry: &mut Registry,
+        dependency: &Dependency,
+        path: &PathBuf,
+    ) -> std::io::Result<()> {
         let destination = crate::smaug::cache_dir().join(dependency.clone().name);
         trace!(
             "Installing git repository {} to {}",
@@ -93,7 +100,7 @@ impl Source for GitSource {
         let result = DirSource {
             path: cached.to_path_buf(),
         }
-        .install(dependency, path);
+        .install(registry, dependency, path);
 
         std::fs::remove_dir_all(cached)?;
 

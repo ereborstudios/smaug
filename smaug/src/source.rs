@@ -1,13 +1,22 @@
 use url_source::UrlSource;
 
-use crate::sources::dir_source::DirSource;
 use crate::sources::file_source::FileSource;
 use crate::{config::DependencyOptions, sources::git_source::GitSource};
 use crate::{dependency::Dependency, sources::url_source};
+use crate::{registry::Registry, sources::dir_source::DirSource};
 use std::path::PathBuf;
 
-pub trait Source {
-    fn install(&self, dependency: &Dependency, path: &PathBuf) -> std::io::Result<()>;
+pub trait Source: SourceClone {
+    fn install(
+        &self,
+        registry: &mut Registry,
+        dependency: &Dependency,
+        path: &PathBuf,
+    ) -> std::io::Result<()>;
+}
+
+pub trait SourceClone {
+    fn clone_box(&self) -> Box<dyn Source>;
 }
 
 pub fn from_dependency_options(options: &DependencyOptions) -> Option<Box<dyn Source>> {
@@ -33,5 +42,20 @@ pub fn from_dependency_options(options: &DependencyOptions) -> Option<Box<dyn So
             url: url.to_string(),
         })),
         _ => None,
+    }
+}
+
+impl<T> SourceClone for T
+where
+    T: 'static + Source + Clone,
+{
+    fn clone_box(&self) -> Box<dyn Source> {
+        Box::new(self.clone())
+    }
+}
+
+impl Clone for Box<dyn Source> {
+    fn clone(&self) -> Box<dyn Source> {
+        self.clone_box()
     }
 }

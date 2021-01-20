@@ -1,17 +1,22 @@
-use crate::dependency::Dependency;
 use crate::source::Source;
 use crate::sources::file_source::FileSource;
+use crate::{dependency::Dependency, registry::Registry};
 use log::*;
 use std::fs::File;
 use std::path::PathBuf;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct UrlSource {
     pub url: String,
 }
 
 impl Source for UrlSource {
-    fn install(&self, dependency: &Dependency, destination: &PathBuf) -> std::io::Result<()> {
+    fn install(
+        &self,
+        registry: &mut Registry,
+        dependency: &Dependency,
+        destination: &PathBuf,
+    ) -> std::io::Result<()> {
         trace!("Downloading Url from {}", self.url);
         let file_name = format!("{}.zip", dependency.clone().name);
         let cached = crate::smaug::cache_dir().join(file_name);
@@ -32,7 +37,7 @@ impl Source for UrlSource {
             )),
             Ok(mut response) => {
                 std::io::copy(&mut response, &mut file)?;
-                FileSource { path: cached }.install(dependency, destination)
+                FileSource { path: cached }.install(registry, dependency, destination)
             }
         }
     }

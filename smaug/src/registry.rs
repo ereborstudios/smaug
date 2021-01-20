@@ -7,19 +7,29 @@ use semver::VersionReq;
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct Registry {
-    pub requirement_map: HashMap<String, Vec<Dependency>>,
+    pub requirements: Vec<Dependency>,
     pub source_map: HashMap<String, Box<dyn Source>>,
+    pub installs: Vec<Install>,
+    pub requires: Vec<String>,
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct Install {
+    pub from: PathBuf,
+    pub to: PathBuf,
 }
 
 impl Registry {
-    pub fn install(&self, destination: PathBuf) -> std::io::Result<()> {
-        for (name, requirements) in self.requirement_map.iter() {
-            let requirement = requirements.first().unwrap();
-            let source = self.source_map.get(name).unwrap();
+    pub fn install(&mut self, destination: PathBuf) -> std::io::Result<()> {
+        let reqs = self.requirements.clone();
+        let sources = self.source_map.clone();
 
-            source.install(requirement, &destination)?;
+        for dependency in reqs.iter() {
+            let source = sources.get(&dependency.name).unwrap();
+
+            source.install(self, dependency, &destination)?;
         }
 
         Ok(())
@@ -30,15 +40,7 @@ impl Registry {
     }
 
     pub fn add_requirement(&mut self, dependency: Dependency) {
-        if self.requirement_map.contains_key(&dependency.name) {
-            self.requirement_map
-                .get_mut(&dependency.name)
-                .unwrap()
-                .push(dependency);
-        } else {
-            self.requirement_map
-                .insert(dependency.name.clone(), vec![dependency]);
-        }
+        self.requirements.push(dependency);
     }
 }
 
