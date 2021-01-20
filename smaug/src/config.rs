@@ -25,9 +25,12 @@ pub struct Config {
 #[derive(Clone, Debug, Deserialize)]
 pub struct Package {
     pub name: String,
-    pub title: String,
     pub version: String,
     pub authors: Vec<String>,
+    #[serde(default)]
+    pub installs: HashMap<String, String>,
+    #[serde(default)]
+    pub requires: Vec<String>,
 }
 
 #[derive(Clone, Debug, Deserialize)]
