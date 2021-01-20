@@ -1270,6 +1270,10 @@ dependencies = [
 [[package]]
 name = "smaug-registry"
 version = "0.1.0"
+dependencies = [
+ "semver",
+ "smaug",
+]
 
 [[package]]
 name = "socket2"

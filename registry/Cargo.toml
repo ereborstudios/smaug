@@ -7,3 +7,6 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+smaug = { path = "../smaug" }
+
+semver = { version = "0.11", features = ["serde"] }
