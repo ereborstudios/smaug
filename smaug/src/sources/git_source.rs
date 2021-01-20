@@ -90,9 +90,13 @@ impl Source for GitSource {
 
         let cached = repository.path().parent().expect("No parent dir");
 
-        DirSource {
+        let result = DirSource {
             path: cached.to_path_buf(),
         }
-        .install(dependency, path)
+        .install(dependency, path);
+
+        std::fs::remove_dir_all(cached)?;
+
+        result
     }
 }
