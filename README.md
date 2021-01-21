@@ -21,7 +21,7 @@ SUBCOMMANDS:
     init          Initializes an existing project as a Smaug project.
     install       Installs dependencies from Smaug.toml.
     new           Start a new DragonRuby project
-    package       Initializes an existing library as a Smaug package.
+    package       Manages your DragonRuby package.
     publish       Publish your DragonRuby project to Itch.io
     run           Runs your DragonRuby project.
 ```
@@ -63,7 +63,7 @@ The following instructions assume your project lives at `~/projects/dragonruby-l
 
 # Creating a package
 
-1. Run `dragonruby package` from your package's directory.
+1. Run `dragonruby package init` from your package's directory.
 2. Edit your package's new `Smaug.toml` file to configure the package.
 3. Add each of the files that are needed for the DragonRuby project.
     ```
