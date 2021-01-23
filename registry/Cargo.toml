@@ -9,4 +9,7 @@ edition = "2018"
 [dependencies]
 smaug = { path = "../smaug" }
 
+actix-web = "3"
 semver = { version = "0.11", features = ["serde"] }
+zip = "0.5"
+zip-extensions = "0.6.0"

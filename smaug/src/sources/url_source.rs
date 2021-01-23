@@ -1,6 +1,6 @@
 use crate::source::Source;
 use crate::sources::file_source::FileSource;
-use crate::{dependency::Dependency, registry::Registry};
+use crate::{dependency::Dependency, resolver::Resolver};
 use log::*;
 use std::fs::File;
 use std::path::PathBuf;
@@ -13,7 +13,7 @@ pub struct UrlSource {
 impl Source for UrlSource {
     fn install(
         &self,
-        registry: &mut Registry,
+        resolver: &mut Resolver,
         dependency: &Dependency,
         destination: &PathBuf,
     ) -> std::io::Result<()> {
@@ -37,7 +37,7 @@ impl Source for UrlSource {
             )),
             Ok(mut response) => {
                 std::io::copy(&mut response, &mut file)?;
-                FileSource { path: cached }.install(registry, dependency, destination)
+                FileSource { path: cached }.install(resolver, dependency, destination)
             }
         }
     }

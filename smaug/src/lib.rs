@@ -8,7 +8,7 @@ pub mod dependency;
 pub mod dragonruby;
 pub mod itch;
 pub mod project;
-pub mod registry;
+pub mod resolver;
 pub mod smaug;
 pub mod source;
 pub mod sources;

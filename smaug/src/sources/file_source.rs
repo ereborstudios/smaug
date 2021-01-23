@@ -1,6 +1,6 @@
 use crate::source::Source;
 use crate::sources::dir_source::DirSource;
-use crate::{dependency::Dependency, registry::Registry};
+use crate::{dependency::Dependency, resolver::Resolver};
 use log::*;
 use std::path::PathBuf;
 use walkdir::WalkDir;
@@ -14,7 +14,7 @@ pub struct FileSource {
 impl Source for FileSource {
     fn install(
         &self,
-        registry: &mut Registry,
+        resolver: &mut Resolver,
         dependency: &Dependency,
         destination: &PathBuf,
     ) -> std::io::Result<()> {
@@ -38,7 +38,7 @@ impl Source for FileSource {
                 std::io::ErrorKind::NotFound,
                 format!("No Smaug.toml file found in {}", cached.display()).as_str(),
             )),
-            Some(dir) => DirSource { path: dir }.install(registry, dependency, &destination),
+            Some(dir) => DirSource { path: dir }.install(resolver, dependency, &destination),
         }
     }
 }

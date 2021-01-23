@@ -1,5 +1,5 @@
 use crate::dependency::Dependency;
-use crate::registry::Registry;
+use crate::resolver::Resolver;
 use crate::source::Source;
 use crate::sources::dir_source::DirSource;
 use git2::build::CheckoutBuilder;
@@ -20,7 +20,7 @@ pub struct GitSource {
 impl Source for GitSource {
     fn install(
         &self,
-        registry: &mut Registry,
+        resolver: &mut Resolver,
         dependency: &Dependency,
         path: &PathBuf,
     ) -> std::io::Result<()> {
@@ -100,7 +100,7 @@ impl Source for GitSource {
         let result = DirSource {
             path: cached.to_path_buf(),
         }
-        .install(registry, dependency, path);
+        .install(resolver, dependency, path);
 
         std::fs::remove_dir_all(cached)?;
 

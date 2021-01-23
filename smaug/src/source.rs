@@ -3,13 +3,13 @@ use url_source::UrlSource;
 use crate::sources::file_source::FileSource;
 use crate::{config::DependencyOptions, sources::git_source::GitSource};
 use crate::{dependency::Dependency, sources::url_source};
-use crate::{registry::Registry, sources::dir_source::DirSource};
+use crate::{resolver::Resolver, sources::dir_source::DirSource};
 use std::path::PathBuf;
 
 pub trait Source: SourceClone {
     fn install(
         &self,
-        registry: &mut Registry,
+        resolver: &mut Resolver,
         dependency: &Dependency,
         path: &PathBuf,
     ) -> std::io::Result<()>;

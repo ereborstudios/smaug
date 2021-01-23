@@ -3,9 +3,9 @@ use crate::command::CommandResult;
 use clap::ArgMatches;
 use log::*;
 use question::{Answer, Question};
-use registry::Registry;
+use resolver::Resolver;
 use serde::Serialize;
-use smaug::registry;
+use smaug::resolver;
 use std::env;
 use std::path::Path;
 use std::path::PathBuf;
@@ -31,7 +31,7 @@ impl Command for Install {
         let config = smaug::config::load(&config_path)?;
         debug!("Smaug config: {:?}", config);
 
-        let mut registry = registry::new_from_config(&config);
+        let mut registry = resolver::new_from_config(&config);
 
         match registry.install(path.join("smaug")) {
             Ok(()) => {
@@ -51,7 +51,7 @@ struct Index {
 }
 
 static INDEX_TEMPLATE: &str = include_str!("../../templates/smaug.rb.template");
-fn write_index(registry: &Registry, path: &Path) -> std::io::Result<()> {
+fn write_index(resolver: &Resolver, path: &Path) -> std::io::Result<()> {
     trace!("Writing index");
     let mut tt = TinyTemplate::new();
 
@@ -59,7 +59,7 @@ fn write_index(registry: &Registry, path: &Path) -> std::io::Result<()> {
         .expect("couldn't add template.");
 
     let context = Index {
-        requires: registry.requires.clone(),
+        requires: resolver.requires.clone(),
     };
 
     debug!("Context: {:?}", context);
@@ -77,10 +77,10 @@ fn write_index(registry: &Registry, path: &Path) -> std::io::Result<()> {
     Ok(())
 }
 
-fn install_files(registry: &Registry) -> std::io::Result<()> {
+fn install_files(resolver: &Resolver) -> std::io::Result<()> {
     trace!("Installing files");
-    debug!("{:?}", registry.installs);
-    for install in registry.installs.iter() {
+    debug!("{:?}", resolver.installs);
+    for install in resolver.installs.iter() {
         if can_install_file(&install.from, &install.to) {
             trace!(
                 "Copying file from {} to {}",

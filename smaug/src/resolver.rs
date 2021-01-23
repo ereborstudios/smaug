@@ -8,7 +8,7 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 
 #[derive(Clone, Default)]
-pub struct Registry {
+pub struct Resolver {
     pub requirements: Vec<Dependency>,
     pub source_map: HashMap<String, Box<dyn Source>>,
     pub installs: Vec<Install>,
@@ -21,7 +21,7 @@ pub struct Install {
     pub to: PathBuf,
 }
 
-impl Registry {
+impl Resolver {
     pub fn install(&mut self, destination: PathBuf) -> std::io::Result<()> {
         let reqs = self.requirements.clone();
         let sources = self.source_map.clone();
@@ -44,8 +44,8 @@ impl Registry {
     }
 }
 
-pub fn new_from_config(config: &Config) -> Registry {
-    let mut registry = Registry::default();
+pub fn new_from_config(config: &Config) -> Resolver {
+    let mut resolver = Resolver::default();
 
     for (name, dependency_options) in config.dependencies.iter() {
         let name = String::from(name);
@@ -62,9 +62,9 @@ pub fn new_from_config(config: &Config) -> Registry {
             version,
         };
 
-        registry.add_requirement(dependency.clone());
-        registry.add_source(dependency.name, source);
+        resolver.add_requirement(dependency.clone());
+        resolver.add_source(dependency.name, source);
     }
 
-    registry
+    resolver
 }

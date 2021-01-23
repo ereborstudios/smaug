@@ -1,6 +1,6 @@
 use crate::dependency::Dependency;
-use crate::registry::Install;
-use crate::registry::Registry;
+use crate::resolver::Install;
+use crate::resolver::Resolver;
 use crate::source::Source;
 use log::*;
 use std::path::PathBuf;
@@ -13,7 +13,7 @@ pub struct DirSource {
 impl Source for DirSource {
     fn install(
         &self,
-        registry: &mut Registry,
+        resolver: &mut Resolver,
         dependency: &Dependency,
         destination: &PathBuf,
     ) -> std::io::Result<()> {
@@ -41,11 +41,11 @@ impl Source for DirSource {
                 to: install_destination,
             };
 
-            registry.installs.push(install);
+            resolver.installs.push(install);
         }
 
         let mut requires = package.requires;
-        registry.requires.append(&mut requires);
+        resolver.requires.append(&mut requires);
 
         Ok(())
     }

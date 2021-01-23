@@ -26,7 +26,14 @@ pub struct Config {
 pub struct Package {
     pub name: String,
     pub description: Option<String>,
+    pub homepage: Option<String>,
+    pub documentation: Option<String>,
+    pub repository: Option<String>,
+    pub readme: Option<String>,
     pub version: String,
+    #[serde(default)]
+    pub keywords: Vec<String>,
+    #[serde(default)]
     pub authors: Vec<String>,
     #[serde(default)]
     pub installs: HashMap<String, String>,
@@ -100,11 +107,19 @@ pub fn load<P: AsRef<Path>>(path: &P) -> Result<Config, Error> {
 
     std::env::set_current_dir(&path.parent().unwrap()).unwrap();
     let contents = std::fs::read_to_string(path.clone()).expect("Could not read Smaug.toml");
-    match toml::from_str(&contents) {
+    from_str(&contents, &path)
+}
+
+pub fn from_str<S: AsRef<str>>(contents: &S, path: &PathBuf) -> Result<Config, Error> {
+    match toml::from_str(contents.as_ref()) {
         Ok(config) => Ok(config),
-        Err(err) => Err(Error::ParseError { path, parent: err }),
+        Err(err) => Err(Error::ParseError {
+            path: path.clone(),
+            parent: err,
+        }),
     }
 }
+
 impl<'de> Deserialize<'de> for DependencyOptions {
     fn deserialize<D>(deserializer: D) -> Result<DependencyOptions, D::Error>
     where
