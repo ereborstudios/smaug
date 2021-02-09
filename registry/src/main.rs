@@ -1,20 +1,11 @@
-pub mod index;
+use smaug_registry::app;
+use std::net::TcpListener;
 
-use actix_web::get;
-use actix_web::App;
-use actix_web::HttpResponse;
-use actix_web::HttpServer;
-use actix_web::Responder;
-
-#[actix_web::main]
+#[actix_rt::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| App::new().service(home))
-        .bind("127.0.0.1:8080")?
-        .run()
-        .await
-}
+    let address = format!("{}:{}", "127.0.0.1", "8080");
+    let listener = TcpListener::bind(address)?;
 
-#[get("/")]
-async fn home() -> impl Responder {
-    HttpResponse::Ok().body("Index")
+    app(listener)?.await?;
+    Ok(())
 }
