@@ -7,6 +7,8 @@ pub struct TestApp {
 
 impl TestApp {
     pub async fn new() -> Self {
+        dotenv::from_filename(".env.test").ok();
+
         let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
         let port = listener.local_addr().unwrap().port();
         let address = format!("http://127.0.0.1:{}", port);

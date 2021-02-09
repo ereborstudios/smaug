@@ -5,6 +5,5 @@ async fn get_ping() {
     let app = TestApp::new().await;
     let response = app.get("/ping").await.expect("Failed to execute request.");
 
-    println!("{:?}", response);
     assert!(response.status().is_success());
 }
