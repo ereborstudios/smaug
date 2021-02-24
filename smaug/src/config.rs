@@ -77,7 +77,7 @@ pub enum DependencyOptions {
         tag: Option<String>,
     },
     Registry {
-        version: VersionReq,
+        version: String,
     },
     Url {
         url: String,
@@ -149,8 +149,10 @@ impl<'de> Deserialize<'de> for DependencyOptions {
                     PathBuf::from(value)
                 };
 
-                if let Ok(version) = VersionReq::parse(value) {
-                    Ok(DependencyOptions::Registry { version })
+                if let Ok(_) = VersionReq::parse(value) {
+                    Ok(DependencyOptions::Registry {
+                        version: value.to_string(),
+                    })
                 } else if let Some("git") = path.extension().and_then(|str| str.to_str()) {
                     Ok(DependencyOptions::Git {
                         repo: value.to_string(),
@@ -222,8 +224,7 @@ impl<'de> Deserialize<'de> for DependencyOptions {
                     })
                 } else if version.is_some() {
                     Ok(DependencyOptions::Registry {
-                        version: VersionReq::parse(&version.expect("No version"))
-                            .expect("Not a valid version"),
+                        version: version.expect("No version"),
                     })
                 } else if url.is_some() {
                     Ok(DependencyOptions::Url {

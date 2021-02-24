@@ -51,7 +51,7 @@ pub fn new_from_config(config: &Config) -> Resolver {
         let name = String::from(name);
         let version = match dependency_options {
             DependencyOptions::Registry { version, .. } => version.clone(),
-            _ => VersionReq::any(),
+            _ => VersionReq::any().to_string(),
         };
 
         debug!("{:?}", dependency_options);

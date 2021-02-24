@@ -74,19 +74,14 @@ impl Source for GitSource {
             let tag = self.tag.clone().unwrap();
             let mut checkout = CheckoutBuilder::new();
 
-            let refname = format!("refs/remotes/origin/tags/{}", tag);
-            let id = repository
-                .refname_to_id(&refname)
-                .unwrap_or_else(|_| panic!("Couldn't find tag {}", tag));
-            let object = repository
-                .find_object(id, None)
-                .expect("Couldn't find object.");
-            let object = object
-                .peel(git2::ObjectType::Commit)
-                .expect("Couldn't peel object to commit");
+            let rev = repository
+                .revparse_single(&tag)
+                .expect("Couldn't parse tag");
+
+            let object = rev.as_tag().expect("Couldn't convert to tag").as_object();
 
             repository
-                .reset(&object, git2::ResetType::Hard, Some(&mut checkout))
+                .reset(object, git2::ResetType::Hard, Some(&mut checkout))
                 .unwrap();
         }
 

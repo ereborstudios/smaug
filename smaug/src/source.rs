@@ -1,6 +1,7 @@
 use url_source::UrlSource;
 
 use crate::sources::file_source::FileSource;
+use crate::sources::registry_source::RegistrySource;
 use crate::{config::DependencyOptions, sources::git_source::GitSource};
 use crate::{dependency::Dependency, sources::url_source};
 use crate::{resolver::Resolver, sources::dir_source::DirSource};
@@ -41,7 +42,9 @@ pub fn from_dependency_options(options: &DependencyOptions) -> Option<Box<dyn So
         DependencyOptions::Url { url } => Some(Box::new(UrlSource {
             url: url.to_string(),
         })),
-        _ => None,
+        DependencyOptions::Registry { version } => Some(Box::new(RegistrySource {
+            version: version.to_string(),
+        })),
     }
 }
 

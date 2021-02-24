@@ -14,7 +14,7 @@ git2 = "0.13"
 linked-hash-map = { version = "0.5.4", features = ["serde_impl"] }
 log = "0.4"
 regex = "1"
-reqwest = { version = "0.11", features = ["blocking"] }
+reqwest = { version = "0.11", features = ["blocking", "json"] }
 semver = { version = "0.11", features = ["serde"] }
 serde = { version = "1.0", features = ["derive"] }
 shellexpand = "2.1"
