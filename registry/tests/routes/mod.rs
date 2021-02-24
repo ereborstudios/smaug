@@ -1,1 +1,0 @@
-mod ping_test;
