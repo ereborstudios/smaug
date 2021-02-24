@@ -1,5 +1,6 @@
 use derive_more::Display;
 use derive_more::Error;
+use linked_hash_map::LinkedHashMap;
 use log::*;
 use semver::VersionReq;
 use serde::de;
@@ -7,7 +8,6 @@ use serde::de::Deserializer;
 use serde::de::MapAccess;
 use serde::de::Visitor;
 use serde::Deserialize;
-use std::collections::HashMap;
 use std::fmt;
 use std::path::Path;
 use std::path::PathBuf;
@@ -19,7 +19,7 @@ pub struct Config {
     pub dragonruby: DragonRuby,
     pub itch: Option<Itch>,
     #[serde(default)]
-    pub dependencies: HashMap<String, DependencyOptions>,
+    pub dependencies: LinkedHashMap<String, DependencyOptions>,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -36,7 +36,7 @@ pub struct Package {
     #[serde(default)]
     pub authors: Vec<String>,
     #[serde(default)]
-    pub installs: HashMap<String, String>,
+    pub installs: LinkedHashMap<String, String>,
     #[serde(default)]
     pub requires: Vec<String>,
 }

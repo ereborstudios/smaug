@@ -6,7 +6,7 @@ use walkdir::WalkDir;
 
 pub fn copy_directory<P: AsRef<Path>>(source: &P, destination: &P) -> io::Result<()> {
     for entry in WalkDir::new(source) {
-        let entry = entry.expect("Could not find file");
+        let entry = entry.expect("Could not find directory");
         let entry = entry.path();
         let relative = entry.strip_prefix(source.as_ref()).unwrap();
         let new_path = destination.as_ref().join(relative);

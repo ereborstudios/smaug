@@ -18,14 +18,15 @@ impl Source for DirSource {
         destination: &PathBuf,
     ) -> std::io::Result<()> {
         let project_dir = destination.parent().unwrap();
+        let source = project_dir.join(self.path.to_path_buf());
         let destination = destination.join(dependency.clone().name);
         trace!(
             "Installing directory from {} to {}",
-            self.path.display(),
+            source.display(),
             destination.display()
         );
 
-        crate::util::dir::copy_directory(&self.path, &destination)?;
+        crate::util::dir::copy_directory(&source, &destination)?;
 
         let config_path = destination.join("Smaug.toml");
         let config = crate::config::load(&config_path).expect("Could not find Smaug.toml");
