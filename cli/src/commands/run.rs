@@ -24,6 +24,11 @@ impl Command for Run {
     fn run(&self, matches: &ArgMatches) -> CommandResult {
         trace!("Run Command");
 
+        let dragonruby_options: Vec<&str> = matches
+            .values_of("DRAGONRUBY_ARGS")
+            .unwrap_or_default()
+            .collect();
+
         let current_directory = env::current_dir().unwrap();
         let directory: &str = matches
             .value_of("path")
@@ -69,13 +74,15 @@ impl Command for Run {
                 let bin = bin_dir.join("dragonruby");
 
                 trace!(
-                    "Spawning Process {} {}",
+                    "Spawning Process {} {} {}",
                     bin.to_str().unwrap(),
-                    path.to_str().unwrap()
+                    path.to_str().unwrap(),
+                    dragonruby_options.join(" ")
                 );
 
                 process::Command::new(bin)
                     .arg(path.clone())
+                    .args(dragonruby_options)
                     .spawn()
                     .unwrap()
                     .wait()

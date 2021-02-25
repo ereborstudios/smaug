@@ -25,6 +25,11 @@ impl Command for Publish {
     fn run(&self, matches: &ArgMatches) -> CommandResult {
         trace!("Publish Command");
 
+        let dragonruby_options: Vec<&str> = matches
+            .values_of("DRAGONRUBY_ARGS")
+            .unwrap_or_default()
+            .collect();
+
         let current_directory = env::current_dir().unwrap();
         let directory: &str = matches
             .value_of("path")
@@ -76,6 +81,7 @@ impl Command for Publish {
                 process::Command::new(bin)
                     .current_dir(bin_dir.to_str().unwrap())
                     .arg(path.file_name().unwrap())
+                    .args(dragonruby_options)
                     .spawn()
                     .unwrap()
                     .wait()
