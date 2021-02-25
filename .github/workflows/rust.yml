@@ -10,8 +10,20 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  rust:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            name: linux
+          - os: macos-latest
+            name: mac
+          - os: windows-latest
+            name: windows
+
+    runs-on: ${{matrix.os }}
+
     steps:
     - uses: actions-rs/toolchain@v1
       with:
@@ -25,29 +37,10 @@ jobs:
         args: -- -D warnings
     - name: Run tests
       run: cargo test --verbose
-
-  upload:
-    needs: test
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        include:
-          - os: ubuntu-latest
-            name: linux
-          - os: macos-latest
-            name: mac
-          - os: windows-latest
-            name: windows
-
-    runs-on: ${{matrix.os }}
-    steps:
-    - uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        override: true
-    - uses: actions/checkout@v2
     - name: build
       run: cargo build --release --locked
+    - name: debug files
+      run: ls target/release
     - name: artifacts
       uses: actions/upload-artifact@v2
       with:
