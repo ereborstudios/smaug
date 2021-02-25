@@ -55,15 +55,24 @@ fn main() {
         )
         (@subcommand run =>
             (about: "Runs your DragonRuby project.")
+            (setting: clap::AppSettings::TrailingVarArg)
+            (setting: clap::AppSettings::AllowLeadingHyphen)
             (@arg path: --path -p +takes_value "The path to your project. Defaults to the current directory.")
+            (@arg DRAGONRUBY_ARGS: ... "dragonruby command options")
         )
         (@subcommand build =>
             (about: "Builds your DragonRuby project.")
+            (setting: clap::AppSettings::TrailingVarArg)
+            (setting: clap::AppSettings::AllowLeadingHyphen)
             (@arg path: --path -p +takes_value "The path to your project. Defaults to the current directory.")
+            (@arg DRAGONRUBY_ARGS: ... "dragonruby command options")
         )
         (@subcommand publish =>
             (about: "Publish your DragonRuby project to Itch.io")
+            (setting: clap::AppSettings::TrailingVarArg)
+            (setting: clap::AppSettings::AllowLeadingHyphen)
             (@arg path: --path -p +takes_value "The path to your project. Defaults to the current directory.")
+            (@arg DRAGONRUBY_ARGS: ... "dragonruby-publish command options")
         )
         (@subcommand install =>
             (about: "Installs dependencies from Smaug.toml.")
