@@ -17,10 +17,13 @@ jobs:
         include:
           - os: ubuntu-latest
             name: linux
+            bin: smaug
           - os: macos-latest
             name: mac
+            bin: smaug
           - os: windows-latest
             name: windows
+            bin: smaug.exe
 
     runs-on: ${{matrix.os }}
 
@@ -39,11 +42,9 @@ jobs:
       run: cargo test --verbose
     - name: build
       run: cargo build --release --locked
-    - name: debug files
-      run: ls target/release
     - name: artifacts
       uses: actions/upload-artifact@v2
       with:
         name: smaug-${{matrix.name}}
-        path: target/release/smaug
+        path: target/release/${{matrix.bin}}
 
