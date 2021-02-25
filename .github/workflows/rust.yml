@@ -47,4 +47,5 @@ jobs:
       with:
         name: smaug-${{matrix.name}}
         path: target/release/${{matrix.bin}}
+        if-no-files-found: error
 
