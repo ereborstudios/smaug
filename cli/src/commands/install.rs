@@ -20,11 +20,12 @@ impl Command for Install {
 
         let current_directory = env::current_dir().unwrap();
         let directory: &str = matches
-            .value_of("PATH")
+            .value_of("path")
             .unwrap_or_else(|| current_directory.to_str().unwrap());
         debug!("Directory: {}", directory);
         let canonical = std::fs::canonicalize(directory)?;
         let path = Path::new(&canonical);
+        let path = std::fs::canonicalize(&path).expect("Could not find path");
 
         let config_path = path.join("Smaug.toml");
 
