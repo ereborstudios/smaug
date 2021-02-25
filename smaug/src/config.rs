@@ -149,7 +149,7 @@ impl<'de> Deserialize<'de> for DependencyOptions {
                     PathBuf::from(value)
                 };
 
-                if let Ok(_) = VersionReq::parse(value) {
+                if VersionReq::parse(value).is_ok() {
                     Ok(DependencyOptions::Registry {
                         version: value.to_string(),
                     })
