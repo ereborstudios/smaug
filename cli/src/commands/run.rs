@@ -75,7 +75,7 @@ impl Command for Run {
                 );
 
                 process::Command::new(bin)
-                    .arg(path.to_path_buf())
+                    .arg(path.clone())
                     .spawn()
                     .unwrap()
                     .wait()
