@@ -20,11 +20,12 @@ impl Command for Install {
 
         let current_directory = env::current_dir().unwrap();
         let directory: &str = matches
-            .value_of("PATH")
+            .value_of("path")
             .unwrap_or_else(|| current_directory.to_str().unwrap());
         debug!("Directory: {}", directory);
         let canonical = std::fs::canonicalize(directory)?;
         let path = Path::new(&canonical);
+        let path = std::fs::canonicalize(&path).expect("Could not find path");
 
         let config_path = path.join("Smaug.toml");
 
@@ -37,7 +38,8 @@ impl Command for Install {
             Ok(()) => {
                 debug!("{:?}", registry.requires);
                 install_files(&registry)?;
-                write_index(&registry, &path)?;
+                write_index(&registry, &path);
+
                 Ok(Box::new("Successfully installed your dependencies."))
             }
             Err(err) => Err(Box::new(err)),
@@ -51,7 +53,7 @@ struct Index {
 }
 
 static INDEX_TEMPLATE: &str = include_str!("../../templates/smaug.rb.template");
-fn write_index(resolver: &Resolver, path: &Path) -> std::io::Result<()> {
+fn write_index(resolver: &Resolver, path: &Path) {
     trace!("Writing index");
     let mut tt = TinyTemplate::new();
 
@@ -73,8 +75,6 @@ fn write_index(resolver: &Resolver, path: &Path) -> std::io::Result<()> {
     std::fs::write(index_path, rendered).expect("Could not write file");
 
     info!("Add `require \"smaug.rb\" to the top of your main.rb");
-
-    Ok(())
 }
 
 fn install_files(resolver: &Resolver) -> std::io::Result<()> {

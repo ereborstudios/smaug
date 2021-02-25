@@ -55,19 +55,19 @@ fn main() {
         )
         (@subcommand run =>
             (about: "Runs your DragonRuby project.")
-            (@arg PATH: "The path to your project. Defaults to the current directory.")
+            (@arg path: --path -p +takes_value "The path to your project. Defaults to the current directory.")
         )
         (@subcommand build =>
             (about: "Builds your DragonRuby project.")
-            (@arg PATH: "The path to your project. Defaults to the current directory.")
+            (@arg path: --path -p +takes_value "The path to your project. Defaults to the current directory.")
         )
         (@subcommand publish =>
             (about: "Publish your DragonRuby project to Itch.io")
-            (@arg PATH: "The path to your project. Defaults to the current directory.")
+            (@arg path: --path -p +takes_value "The path to your project. Defaults to the current directory.")
         )
         (@subcommand install =>
             (about: "Installs dependencies from Smaug.toml.")
-            (@arg PATH: "The path to your project. Defaults to the current directory.")
+            (@arg path: --path -p +takes_value "The path to your project. Defaults to the current directory.")
         )
     )
     .get_matches();
