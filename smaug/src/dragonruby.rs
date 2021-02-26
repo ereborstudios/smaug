@@ -136,33 +136,33 @@ pub fn list_installed() -> io::Result<Vec<DragonRuby>> {
 
 pub fn dragonruby_bin_name() -> String {
     if cfg!(windows) {
-        return "dragonruby.exe".to_string();
+        "dragonruby.exe".to_string()
     } else {
-        return "dragonruby".to_string();
+        "dragonruby".to_string()
     }
 }
 
 pub fn dragonruby_bind_name() -> String {
     if cfg!(windows) {
-        return "dragonruby-bind.exe".to_string();
+        "dragonruby-bind.exe".to_string()
     } else {
-        return "dragonruby-bind".to_string();
+        "dragonruby-bind".to_string()
     }
 }
 
 pub fn dragonruby_httpd_name() -> String {
     if cfg!(windows) {
-        return "dragonruby-httpd.exe".to_string();
+        "dragonruby-httpd.exe".to_string()
     } else {
-        return "dragonruby-httpd".to_string();
+        "dragonruby-httpd".to_string()
     }
 }
 
 pub fn dragonruby_publish_name() -> String {
     if cfg!(windows) {
-        return "dragonruby-publish.exe".to_string();
+        "dragonruby-publish.exe".to_string()
     } else {
-        return "dragonruby-publish".to_string();
+        "dragonruby-publish".to_string()
     }
 }
 
