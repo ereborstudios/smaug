@@ -134,6 +134,38 @@ pub fn list_installed() -> io::Result<Vec<DragonRuby>> {
     Ok(versions)
 }
 
+pub fn dragonruby_bin_name() -> String {
+    if cfg!(windows) {
+        return "dragonruby.exe".to_string();
+    } else {
+        return "dragonruby".to_string();
+    }
+}
+
+pub fn dragonruby_bind_name() -> String {
+    if cfg!(windows) {
+        return "dragonruby-bind.exe".to_string();
+    } else {
+        return "dragonruby-bind".to_string();
+    }
+}
+
+pub fn dragonruby_httpd_name() -> String {
+    if cfg!(windows) {
+        return "dragonruby-httpd.exe".to_string();
+    } else {
+        return "dragonruby-httpd".to_string();
+    }
+}
+
+pub fn dragonruby_publish_name() -> String {
+    if cfg!(windows) {
+        return "dragonruby-publish.exe".to_string();
+    } else {
+        return "dragonruby-publish".to_string();
+    }
+}
+
 fn parse_dragonruby_zip(path: &Path) -> DragonRubyResult {
     let cache = smaug::cache_dir();
     trace!("Unzipping DragonRuby from {}", path.display());
@@ -161,9 +193,9 @@ fn parse_dragonruby_dir(path: &Path) -> DragonRubyResult {
         });
     };
 
-    let dragonruby_bin = path.join("dragonruby");
+    let dragonruby_bin = path.join(dragonruby_bin_name());
     debug!("DragonRuby bin {}", dragonruby_bin.display());
-    let dragonruby_bind_bin = path.join("dragonruby-bind");
+    let dragonruby_bind_bin = path.join(dragonruby_bind_name());
     debug!("DragonRuby Bind bin {}", dragonruby_bind_bin.display());
     let changelog = path.join("CHANGELOG.txt");
     debug!("Changelog {}", changelog.display());

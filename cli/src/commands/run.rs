@@ -71,7 +71,7 @@ impl Command for Run {
                 };
 
                 debug!("DragonRuby Directory: {}", bin_dir.to_str().unwrap());
-                let bin = bin_dir.join("dragonruby");
+                let bin = bin_dir.join(dragonruby::dragonruby_bin_name());
 
                 trace!(
                     "Spawning Process {} {} {}",

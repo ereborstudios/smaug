@@ -71,7 +71,7 @@ impl Command for Build {
                 };
 
                 debug!("DragonRuby Directory: {}", bin_dir.to_str().unwrap());
-                let bin = bin_dir.join("dragonruby-publish");
+                let bin = bin_dir.join(dragonruby::dragonruby_publish_name());
 
                 trace!(
                     "Spawning Process {} {} {}",
