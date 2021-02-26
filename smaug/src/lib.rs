@@ -1,6 +1,5 @@
 extern crate derive_more;
 extern crate regex;
-pub extern crate remove_dir_all;
 extern crate semver;
 extern crate shellexpand;
 

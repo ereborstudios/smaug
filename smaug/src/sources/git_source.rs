@@ -7,7 +7,6 @@ use git2::build::RepoBuilder;
 use git2::FetchOptions;
 use git2::Oid;
 use log::*;
-use remove_dir_all::remove_dir_all;
 use std::path::PathBuf;
 
 #[derive(Clone, Debug)]
@@ -34,7 +33,7 @@ impl Source for GitSource {
 
         if destination.exists() {
             trace!("Removing directory {}", destination.to_str().unwrap());
-            remove_dir_all(destination.clone()).unwrap();
+            rm_rf::ensure_removed(destination.clone()).unwrap();
         }
 
         let fetch = FetchOptions::new();
@@ -87,9 +86,7 @@ impl Source for GitSource {
         }
 
         let git_dir = destination.join(".git");
-        if git_dir.is_dir() {
-            remove_dir_all(git_dir)?;
-        }
+        rm_rf::ensure_removed(git_dir).expect("Couldn't delete directory");
 
         let cached = repository.path().parent().expect("No parent dir");
 
@@ -98,7 +95,7 @@ impl Source for GitSource {
         }
         .install(resolver, dependency, path);
 
-        remove_dir_all(cached)?;
+        rm_rf::ensure_removed(cached).expect("couldn't delete directory");
 
         result
     }

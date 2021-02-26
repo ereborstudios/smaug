@@ -2,7 +2,6 @@ use crate::source::Source;
 use crate::sources::dir_source::DirSource;
 use crate::{dependency::Dependency, resolver::Resolver};
 use log::*;
-use remove_dir_all::remove_dir_all;
 use std::path::PathBuf;
 use walkdir::WalkDir;
 use zip_extensions::zip_extract;
@@ -22,9 +21,7 @@ impl Source for FileSource {
         trace!("Installing file at {}", self.path.display());
         let cached = crate::smaug::cache_dir().join(dependency.clone().name);
 
-        if cached.is_dir() {
-            remove_dir_all(cached.clone())?;
-        }
+        rm_rf::ensure_removed(cached.clone()).expect("Couldn't remove directory");
 
         trace!("Extracting zip to {}", cached.display());
         zip_extract(&self.path.to_path_buf(), &cached)?;

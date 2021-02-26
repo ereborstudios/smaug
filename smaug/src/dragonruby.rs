@@ -2,7 +2,6 @@ use crate::{config::Config, smaug};
 use derive_more::Display;
 use derive_more::Error;
 use log::*;
-use remove_dir_all::remove_dir_all;
 use semver::Version as SemVer;
 use semver::VersionReq;
 use std::fs;
@@ -170,9 +169,7 @@ pub fn dragonruby_publish_name() -> String {
 fn parse_dragonruby_zip(path: &Path) -> DragonRubyResult {
     let cache = smaug::cache_dir();
     trace!("Unzipping DragonRuby from {}", path.display());
-    if cache.is_dir() {
-        remove_dir_all(cache.clone()).expect("Couldn't clear cache");
-    }
+    rm_rf::ensure_removed(cache.clone()).expect("Couldn't clear cache");
     zip_extensions::zip_extract(&path.to_path_buf(), &cache).expect("Could not extract zip");
     trace!("Unzipped DragonRuby to {}", cache.display());
     let mut dir = fs::read_dir(cache.as_path()).expect("Could not read from cache");
