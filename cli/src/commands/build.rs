@@ -5,6 +5,7 @@ use derive_more::Display;
 use derive_more::Error;
 use log::*;
 use smaug::dragonruby;
+use smaug::remove_dir_all::remove_dir_all;
 use smaug::util::dir::copy_directory;
 use std::env;
 use std::path::Path;
@@ -63,11 +64,11 @@ impl Command for Build {
                 let exception_dir = build_dir.join("exceptions");
 
                 if log_dir.is_dir() {
-                    std::fs::remove_dir_all(&log_dir).expect("couldn't remove logs");
+                    remove_dir_all(&log_dir).expect("couldn't remove logs");
                 };
 
                 if exception_dir.is_dir() {
-                    std::fs::remove_dir_all(&exception_dir).expect("couldn't remove exceptions");
+                    remove_dir_all(&exception_dir).expect("couldn't remove exceptions");
                 };
 
                 debug!("DragonRuby Directory: {}", bin_dir.to_str().unwrap());
@@ -92,17 +93,16 @@ impl Command for Build {
                 copy_directory(&bin_dir.join("builds"), &path.join("builds"))
                     .expect("Could not copy builds.");
 
-                std::fs::remove_dir_all(build_dir).expect("Could not clean up build dir");
+                remove_dir_all(build_dir).expect("Could not clean up build dir");
 
                 let local_log_dir = &path.join("logs");
                 if local_log_dir.is_dir() {
-                    std::fs::remove_dir_all(&local_log_dir).expect("Couldn't remove local logs");
+                    remove_dir_all(&local_log_dir).expect("Couldn't remove local logs");
                 }
 
                 let local_exception_dir = &path.join("exceptions");
                 if local_exception_dir.is_dir() {
-                    std::fs::remove_dir_all(&local_exception_dir)
-                        .expect("Couldn't remove local exceptions");
+                    remove_dir_all(&local_exception_dir).expect("Couldn't remove local exceptions");
                 }
 
                 if log_dir.is_dir() {

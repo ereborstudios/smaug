@@ -2,6 +2,7 @@ use crate::source::Source;
 use crate::sources::dir_source::DirSource;
 use crate::{dependency::Dependency, resolver::Resolver};
 use log::*;
+use remove_dir_all::remove_dir_all;
 use std::path::PathBuf;
 use walkdir::WalkDir;
 use zip_extensions::zip_extract;
@@ -22,7 +23,7 @@ impl Source for FileSource {
         let cached = crate::smaug::cache_dir().join(dependency.clone().name);
 
         if cached.is_dir() {
-            std::fs::remove_dir_all(cached.clone())?;
+            remove_dir_all(cached.clone())?;
         }
 
         trace!("Extracting zip to {}", cached.display());

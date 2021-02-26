@@ -1,10 +1,10 @@
 use crate::command::Command;
 use crate::command::CommandResult;
 use ::smaug::dragonruby;
+use ::smaug::remove_dir_all::remove_dir_all;
 use clap::ArgMatches;
 use log::*;
 use smaug::smaug;
-use std::fs;
 
 use super::list::List;
 
@@ -34,7 +34,7 @@ impl Command for Uninstall {
 
                 match dragonruby {
                     Ok(dr) => {
-                        fs::remove_dir_all(dr.path).expect("DragonRuby folder not removed.");
+                        remove_dir_all(dr.path).expect("DragonRuby folder not removed.");
                         let message = format!("Uninstalled {}", dr.version);
 
                         Ok(Box::new(message))
