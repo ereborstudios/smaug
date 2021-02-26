@@ -29,6 +29,8 @@ impl Command for Run {
             .unwrap_or_default()
             .collect();
 
+        let httpd = matches.is_present("http");
+
         let current_directory = env::current_dir().unwrap();
         let directory: &str = matches
             .value_of("path")
@@ -71,7 +73,11 @@ impl Command for Run {
                 };
 
                 debug!("DragonRuby Directory: {}", bin_dir.to_str().unwrap());
-                let bin = bin_dir.join(dragonruby::dragonruby_bin_name());
+                let mut bin = bin_dir.join(dragonruby::dragonruby_bin_name());
+
+                if httpd {
+                    bin = bin_dir.join(dragonruby::dragonruby_httpd_name());
+                }
 
                 trace!(
                     "Spawning Process {} {} {}",
