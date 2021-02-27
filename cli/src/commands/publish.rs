@@ -62,16 +62,11 @@ impl Command for Publish {
                 let log_dir = build_dir.join("logs");
                 let exception_dir = build_dir.join("exceptions");
 
-                if log_dir.is_dir() {
-                    std::fs::remove_dir_all(&log_dir).expect("couldn't remove logs");
-                };
-
-                if exception_dir.is_dir() {
-                    std::fs::remove_dir_all(&exception_dir).expect("couldn't remove exceptions");
-                };
+                rm_rf::ensure_removed(&log_dir).expect("couldn't remove logs");
+                rm_rf::ensure_removed(&exception_dir).expect("couldn't remove exceptions");
 
                 debug!("DragonRuby Directory: {}", bin_dir.to_str().unwrap());
-                let bin = bin_dir.join("dragonruby-publish");
+                let bin = bin_dir.join(dragonruby::dragonruby_publish_name());
 
                 trace!(
                     "Spawning Process {} {}",
@@ -91,15 +86,11 @@ impl Command for Publish {
                     .expect("Could not copy builds.");
 
                 let local_log_dir = &path.join("logs");
-                if local_log_dir.is_dir() {
-                    std::fs::remove_dir_all(&local_log_dir).expect("Couldn't remove local logs");
-                }
+                rm_rf::ensure_removed(&local_log_dir).expect("Couldn't remove local logs");
 
                 let local_exception_dir = &path.join("exceptions");
-                if local_exception_dir.is_dir() {
-                    std::fs::remove_dir_all(&local_exception_dir)
-                        .expect("Couldn't remove local exceptions");
-                }
+                rm_rf::ensure_removed(&local_exception_dir)
+                    .expect("Couldn't remove local exceptions");
 
                 if log_dir.is_dir() {
                     smaug::util::dir::copy_directory(&log_dir, &local_log_dir)
@@ -111,7 +102,7 @@ impl Command for Publish {
                         .expect("couldn't copy exceptions");
                 }
 
-                std::fs::remove_dir_all(build_dir).expect("Could not clean up build dir");
+                rm_rf::ensure_removed(build_dir).expect("Could not clean up build dir");
 
                 Ok(Box::new(format!(
                     "Successfully published {} to Itch.io!",

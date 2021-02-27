@@ -8,7 +8,6 @@ use serde::Serialize;
 use smaug::resolver;
 use std::env;
 use std::path::Path;
-use std::path::PathBuf;
 use tinytemplate::TinyTemplate;
 
 #[derive(Debug)]
@@ -81,21 +80,24 @@ fn install_files(resolver: &Resolver) -> std::io::Result<()> {
     trace!("Installing files");
     debug!("{:?}", resolver.installs);
     for install in resolver.installs.iter() {
-        if can_install_file(&install.from, &install.to) {
+        let source = install.from.as_path();
+        let destination = install.to.as_path();
+
+        if can_install_file(&source, &destination) {
             trace!(
                 "Copying file from {} to {}",
-                install.from.display(),
-                install.to.display()
+                source.display(),
+                destination.display()
             );
-            std::fs::create_dir_all(install.to.parent().unwrap())?;
-            std::fs::copy(install.from.clone(), install.to.clone())?;
+            std::fs::create_dir_all(destination.parent().unwrap())?;
+            std::fs::copy(source, destination)?;
         }
     }
 
     Ok(())
 }
 
-fn can_install_file(source: &PathBuf, destination: &PathBuf) -> bool {
+fn can_install_file(source: &Path, destination: &Path) -> bool {
     if !destination.exists() {
         return true;
     }

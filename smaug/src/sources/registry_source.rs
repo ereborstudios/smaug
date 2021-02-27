@@ -1,5 +1,4 @@
 use crate::dependency::Dependency;
-use crate::resolver::Resolver;
 use crate::source::Source;
 use crate::sources::git_source::GitSource;
 use log::*;
@@ -28,12 +27,7 @@ struct PackageResponse {
 }
 
 impl Source for RegistrySource {
-    fn install(
-        &self,
-        resolver: &mut Resolver,
-        dependency: &Dependency,
-        destination: &PathBuf,
-    ) -> std::io::Result<()> {
+    fn install(&self, dependency: &Dependency, destination: &PathBuf) -> std::io::Result<()> {
         trace!(
             "Fetching {} version {} from registry",
             dependency.clone().name,
@@ -42,7 +36,7 @@ impl Source for RegistrySource {
 
         let source = fetch_from_registry(dependency.name.clone(), self.version.clone())?;
 
-        source.install(resolver, dependency, destination)
+        source.install(dependency, destination)
     }
 }
 

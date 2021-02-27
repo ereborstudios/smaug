@@ -58,6 +58,7 @@ fn main() {
             (setting: clap::AppSettings::TrailingVarArg)
             (setting: clap::AppSettings::AllowLeadingHyphen)
             (@arg path: --path -p +takes_value "The path to your project. Defaults to the current directory.")
+            (@arg http: --http "Run your HTML5 game")
             (@arg DRAGONRUBY_ARGS: ... "dragonruby command options")
         )
         (@subcommand build =>

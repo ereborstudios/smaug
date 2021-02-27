@@ -11,7 +11,7 @@ pub fn copy_directory<P: AsRef<Path>>(source: &P, destination: &P) -> io::Result
         let relative = entry.strip_prefix(source.as_ref()).unwrap();
         let new_path = destination.as_ref().join(relative);
 
-        if entry.is_file() && !entry.to_str().unwrap().contains("/.git/") {
+        if entry.is_file() && !is_git_dir(entry.to_str().unwrap()) {
             trace!(
                 "Creating directory {}",
                 new_path.parent().and_then(|p| p.to_str()).unwrap()
@@ -27,4 +27,8 @@ pub fn copy_directory<P: AsRef<Path>>(source: &P, destination: &P) -> io::Result
     }
 
     Ok(())
+}
+
+fn is_git_dir(path: &str) -> bool {
+    path.contains("/.git/") || path.contains("\\.git\\")
 }

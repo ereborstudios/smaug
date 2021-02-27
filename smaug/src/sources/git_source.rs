@@ -1,5 +1,4 @@
 use crate::dependency::Dependency;
-use crate::resolver::Resolver;
 use crate::source::Source;
 use crate::sources::dir_source::DirSource;
 use git2::build::CheckoutBuilder;
@@ -18,12 +17,7 @@ pub struct GitSource {
 }
 
 impl Source for GitSource {
-    fn install(
-        &self,
-        resolver: &mut Resolver,
-        dependency: &Dependency,
-        path: &PathBuf,
-    ) -> std::io::Result<()> {
+    fn install(&self, dependency: &Dependency, path: &PathBuf) -> std::io::Result<()> {
         let destination = crate::smaug::cache_dir().join(dependency.clone().name);
         trace!(
             "Installing git repository {} to {}",
@@ -33,7 +27,7 @@ impl Source for GitSource {
 
         if destination.exists() {
             trace!("Removing directory {}", destination.to_str().unwrap());
-            std::fs::remove_dir_all(destination.clone()).unwrap();
+            rm_rf::ensure_removed(destination.clone()).unwrap();
         }
 
         let fetch = FetchOptions::new();
@@ -85,20 +79,11 @@ impl Source for GitSource {
                 .unwrap();
         }
 
-        let git_dir = destination.join(".git");
-        if git_dir.is_dir() {
-            std::fs::remove_dir_all(git_dir)?;
-        }
-
         let cached = repository.path().parent().expect("No parent dir");
 
-        let result = DirSource {
+        DirSource {
             path: cached.to_path_buf(),
         }
-        .install(resolver, dependency, path);
-
-        std::fs::remove_dir_all(cached)?;
-
-        result
+        .install(dependency, path)
     }
 }

@@ -1,19 +1,50 @@
 use url_source::UrlSource;
 
+use crate::resolver::Install;
 use crate::sources::file_source::FileSource;
 use crate::sources::registry_source::RegistrySource;
 use crate::{config::DependencyOptions, sources::git_source::GitSource};
 use crate::{dependency::Dependency, sources::url_source};
 use crate::{resolver::Resolver, sources::dir_source::DirSource};
+use log::*;
 use std::path::PathBuf;
 
 pub trait Source: SourceClone {
-    fn install(
+    fn install(&self, dependency: &Dependency, path: &PathBuf) -> std::io::Result<()>;
+
+    fn installed(&self, dependency: &Dependency, destination: &PathBuf) -> bool {
+        let destination = destination.join(dependency.clone().name);
+        destination.exists()
+    }
+
+    fn update_resolver(
         &self,
         resolver: &mut Resolver,
         dependency: &Dependency,
-        path: &PathBuf,
-    ) -> std::io::Result<()>;
+        destination: &PathBuf,
+    ) {
+        let project_dir = destination.parent().unwrap();
+        let destination = destination.join(dependency.clone().name);
+        let config_path = destination.join("Smaug.toml");
+        let config = crate::config::load(&config_path).expect("Could not find Smaug.toml");
+        debug!("Package config: {:?}", config);
+        let package = config.package.expect("No package configuration found.");
+
+        for (from, to) in package.installs {
+            let install_source = from.to_path(destination.as_path());
+            let install_destination = to.to_path(project_dir);
+
+            let install = Install {
+                from: install_source,
+                to: install_destination,
+            };
+
+            resolver.installs.push(install);
+        }
+
+        let mut requires = package.requires;
+        resolver.requires.append(&mut requires);
+    }
 }
 
 pub trait SourceClone {

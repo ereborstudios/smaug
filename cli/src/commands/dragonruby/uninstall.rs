@@ -4,7 +4,6 @@ use ::smaug::dragonruby;
 use clap::ArgMatches;
 use log::*;
 use smaug::smaug;
-use std::fs;
 
 use super::list::List;
 
@@ -34,7 +33,7 @@ impl Command for Uninstall {
 
                 match dragonruby {
                     Ok(dr) => {
-                        fs::remove_dir_all(dr.path).expect("DragonRuby folder not removed.");
+                        rm_rf::ensure_removed(dr.path).expect("DragonRuby folder not removed.");
                         let message = format!("Uninstalled {}", dr.version);
 
                         Ok(Box::new(message))
