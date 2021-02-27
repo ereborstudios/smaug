@@ -2,6 +2,7 @@ use derive_more::Display;
 use derive_more::Error;
 use linked_hash_map::LinkedHashMap;
 use log::*;
+use relative_path::RelativePathBuf;
 use semver::VersionReq;
 use serde::de;
 use serde::de::Deserializer;
@@ -36,7 +37,7 @@ pub struct Package {
     #[serde(default)]
     pub authors: Vec<String>,
     #[serde(default)]
-    pub installs: LinkedHashMap<String, String>,
+    pub installs: LinkedHashMap<RelativePathBuf, RelativePathBuf>,
     #[serde(default)]
     pub requires: Vec<String>,
 }

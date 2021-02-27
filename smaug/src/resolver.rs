@@ -23,6 +23,8 @@ pub struct Install {
 
 impl Resolver {
     pub fn install(&mut self, destination: PathBuf) -> std::io::Result<()> {
+        info!("Installing Dependencies\n");
+
         let reqs = self.requirements.clone();
         let sources = self.source_map.clone();
 
@@ -32,11 +34,14 @@ impl Resolver {
             if source.installed(dependency, &destination) {
                 info!("{} is already installed", dependency.name);
             } else {
+                info!("Installing {}", dependency.name);
                 source.install(dependency, &destination)?;
             }
 
             source.update_resolver(self, dependency, &destination);
         }
+
+        info!("");
 
         Ok(())
     }

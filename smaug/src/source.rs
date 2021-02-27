@@ -31,8 +31,8 @@ pub trait Source: SourceClone {
         let package = config.package.expect("No package configuration found.");
 
         for (from, to) in package.installs {
-            let install_source = destination.join(from);
-            let install_destination = project_dir.join(to);
+            let install_source = from.to_path(destination.as_path());
+            let install_destination = to.to_path(project_dir);
 
             let install = Install {
                 from: install_source,

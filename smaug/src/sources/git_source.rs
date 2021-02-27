@@ -79,18 +79,11 @@ impl Source for GitSource {
                 .unwrap();
         }
 
-        let git_dir = destination.join(".git");
-        rm_rf::ensure_removed(git_dir).expect("Couldn't delete directory");
-
         let cached = repository.path().parent().expect("No parent dir");
 
-        let result = DirSource {
+        DirSource {
             path: cached.to_path_buf(),
         }
-        .install(dependency, path);
-
-        rm_rf::ensure_removed(cached).expect("couldn't delete directory");
-
-        result
+        .install(dependency, path)
     }
 }
