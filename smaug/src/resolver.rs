@@ -29,7 +29,13 @@ impl Resolver {
         for dependency in reqs.iter() {
             let source = sources.get(&dependency.name).unwrap();
 
-            source.install(self, dependency, &destination)?;
+            if source.installed(dependency, &destination) {
+                info!("{} is already installed", dependency.name);
+            } else {
+                source.install(dependency, &destination)?;
+            }
+
+            source.update_resolver(self, dependency, &destination);
         }
 
         Ok(())
