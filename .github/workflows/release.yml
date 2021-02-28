@@ -14,6 +14,9 @@ jobs:
 
     runs-on: "ubuntu-latest"
 
+    outputs:
+      upload_url: ${{ steps.create-release.outputs.upload_url }}
+
     steps:
     - name: release
       id: create-release
@@ -68,7 +71,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create-release.outputs.upload_url }}
+        upload_url: ${{ jobs.create-release.outputs.upload_url }}
         asset_path: ./smaug-${{matrix.name}}.zip
         asset_name: smaug-${{matrix.name}}.zip
         asset_content_type: application/zip
