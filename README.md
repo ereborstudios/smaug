@@ -5,6 +5,10 @@ Smaug is a tool to manage your DragonRuby Game Toolkit projects.
 # Usage
 
 ```
+smaug 0.1.0
+Matt Pruitt <matt@guitsaru.com>
+Installs DragonRuby dependencies
+
 USAGE:
     smaug [FLAGS] [SUBCOMMAND]
 
@@ -29,7 +33,7 @@ SUBCOMMANDS:
 # Starting a new DragonRuby project
 
 1. Download a copy of the DragonRuby Game Toolkit from either [Itch.io](https://dragonruby.itch.io/dragonruby-gtk) (standard) or [the DragonRuby website](https://dragonruby.herokuapp.com/toolkit/game) (pro).
-2. Install your downloaded copy of DragonRuby: `smaug install ~/Downloads/dragonruby-linux-amd64.zip`.
+2. Install your downloaded copy of DragonRuby: `smaug dragonruby install ~/Downloads/dragonruby-linux-amd64.zip`.
 3. Create a new project: `smaug new my-game` then `cd my-game`.
 4. Edit your project's configuration at `Smaug.toml`.
 5. Run your game: `smaug run`.
@@ -56,10 +60,32 @@ The following instructions assume your project lives at `~/projects/dragonruby-l
 1. Edit `Smaug.toml`:
     ```
     [dependencies]
-    draco = "https://github.com/guitsaru/draco.git"
+    draco = "0.6.1"
     ```
 2. Run `smaug install`
 3. Add `require "app/smaug.rb"` to the top of your `main.rb`.
+
+### Package Sources
+
+```
+# Smaug Registry
+name = "version"
+
+# Directory
+name = "path/to/package"
+
+# Zip File
+name = "path/to/package.zip"
+
+# Online Zip File
+name = "https://example.com/package.zip"
+
+# Git Repository
+name = "https://github.com/example/package"
+
+# Git Repository Tag
+name = { repo = "https://github.com/example/package", tag = "v1.0" }
+```
 
 # Creating a package
 
@@ -67,11 +93,19 @@ The following instructions assume your project lives at `~/projects/dragonruby-l
 2. Edit your package's new `Smaug.toml` file to configure the package.
 3. Add each of the files that are needed for the DragonRuby project.
     ```
-    # package_file = project_file
-    "lib/library.rb" = "app/lib/library.rb"
-
-    # If you don't want to `require` the file in `smaug.rb`
-    "lib/library.rb" = { path = "app/lib/library.rb", require = false }
+    requires = [
+        "lib/library.rb",
+        "lib/library/other.rb"
+    ]
     ```
 4. Publish your changes.
 
+### Install Files
+
+You can install files into the game project from your package.
+
+```
+[package.installs]
+# "location in package" = "location in game project"
+"tiles/grass.png" = "app/sprites/grass.png"
+```

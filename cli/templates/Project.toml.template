@@ -19,10 +19,3 @@ url = "todo-change-me"
 username = "todo-change-me"
 
 [dependencies]
-
-# Dependency Examples
-# draco = "https://github.com/guitsaru/draco.git"
-# branch = \{ repo = "https://github.com/guitsaru/draco.git", branch = "main" }
-# local = "../dependency/"
-# zipped = "../dependency.zip"
-# download = "https://example.com/download.zip"
