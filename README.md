@@ -2,6 +2,21 @@
 
 Smaug is a tool to manage your DragonRuby Game Toolkit projects.
 
+# Installation
+
+# Manual Installation
+
+You can download the latest version from the [release page](https://github.com/ereborstudios/smaug/releases).
+
+## Mac
+
+Install with [homebrew](https://brew.sh).
+
+```
+brew tap ereborstudios/tap
+brew install smaug
+```
+
 # Usage
 
 ```
