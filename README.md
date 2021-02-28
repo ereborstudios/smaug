@@ -17,6 +17,15 @@ brew tap ereborstudios/tap
 brew install smaug
 ```
 
+## Windows
+
+Install with [scoop](https://scoop.sh).
+
+```
+scoop bucket add ereborstudios https://github.com/ereborstudios/scoop-bucket.git
+scoop install smaug
+```
+
 # Usage
 
 ```
