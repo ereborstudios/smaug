@@ -32,6 +32,8 @@ jobs:
   upload-release:
     name: "Tagged Release"
 
+    needs: create-release
+
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
@@ -71,7 +73,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ jobs.create-release.outputs.upload_url }}
+        upload_url: ${{ needs.create-release.outputs.upload_url }}
         asset_path: ./smaug-${{matrix.name}}.zip
         asset_name: smaug-${{matrix.name}}.zip
         asset_content_type: application/zip
