@@ -1,6 +1,6 @@
 [package]
 name = "{ name }"
-author = "TODO: Author Name"
+authors = ["TODO <TODO@example.com>"]
 version = "0.1.0"
 url = "TODO: Package Website"
 # Which files do you want to be automatically required from your package.
