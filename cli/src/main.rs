@@ -112,7 +112,7 @@ fn main() {
 fn print_message() {
     info!("");
     info!("Thanks for using Smaug!");
-    info!("🦗 Explore the package registry at https://smaug.dev/");
+    info!("📦 Explore the package registry at https://smaug.dev/");
     info!("🦗 Find a bug? File an issue: https://github.com/ereborstudios/smaug/issues");
     info!("🙋 Have a question? Start a discussion: https://github.com/ereborstudios/smaug/discussions");
     info!("💬 Want to chat? Join us on Discord: https://discord.gg/fQdZcgJf");
