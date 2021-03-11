@@ -2,9 +2,16 @@
 name = "{ name }"
 authors = ["TODO <TODO@example.com>"]
 version = "0.1.0"
-url = "TODO: Package Website"
+homepage = "TODO: Package Website"
+keywords = []
+
+# Optional:
+# documentation = "https://example.com"
+# repository = "http://github.com/example/example"
+
 # Which files do you want to be automatically required from your package.
 # requires = ["lib/library.rb"]
+
 
 [package.installs]
 # Example
