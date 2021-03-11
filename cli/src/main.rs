@@ -16,7 +16,7 @@ fn main() {
     let matches = clap_app!(smaug =>
         (version: "0.1.0")
         (author: "Matt Pruitt <matt@guitsaru.com>")
-        (about: "Installs DragonRuby dependencies")
+        (about: "Create games and share packages with the DragonRuby community")
         (setting: clap::AppSettings::ArgRequiredElseHelp)
 
         (@arg verbose: -v... --verbose... +global takes_value(false) "Displays more information")
@@ -112,9 +112,10 @@ fn main() {
 fn print_message() {
     info!("");
     info!("Thanks for using Smaug!");
-    info!("🦗 Find a bug? File an issue: https://github.com/guitsaru/smaug/issues");
-    info!("🙋 Have a question? Start a discussion: https://github.com/guitsaru/smaug/discussions");
-    info!("💬 Want to chat? Join us on Discord: https://discord.gg/3MEsGjxZ");
+    info!("📦 Explore the package registry at https://smaug.dev/");
+    info!("🦗 Find a bug? File an issue: https://github.com/ereborstudios/smaug/issues");
+    info!("🙋 Have a question? Start a discussion: https://github.com/ereborstudios/smaug/discussions");
+    info!("💬 Want to chat? Join us on Discord: https://discord.gg/fQdZcgJf");
     info!("");
 }
 
