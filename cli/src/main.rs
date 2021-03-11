@@ -9,7 +9,7 @@ use crate::commands::package::Package;
 use crate::commands::run::Run;
 use clap::clap_app;
 use commands::install::Install;
-use commands::{build::Build, dragonruby::DragonRuby, init::Init, new::New, publish::Publish};
+use commands::{build::Build, dragonruby::DragonRuby, init::Init, new::New, publish::Publish, add::Add};
 use log::*;
 
 fn main() {
@@ -79,6 +79,11 @@ fn main() {
             (about: "Installs dependencies from Smaug.toml.")
             (@arg path: --path -p +takes_value "The path to your project. Defaults to the current directory.")
         )
+        (@subcommand add =>
+            (about: "Add a dependency to Smaug.toml")
+            (@arg path: --path -p +takes_value "The path to your project. Defaults to the current directory.")
+            (@arg PACKAGE: +required "The location of a package to add")
+        )
     )
     .get_matches();
 
@@ -93,6 +98,7 @@ fn main() {
         Some("package") => Box::new(Package),
         Some("publish") => Box::new(Publish),
         Some("run") => Box::new(Run),
+        Some("add") => Box::new(Add),
         _ => unreachable!(),
     };
 
