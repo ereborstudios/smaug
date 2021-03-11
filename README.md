@@ -37,7 +37,7 @@ scoop install smaug
 ```
 smaug 0.1.0
 Matt Pruitt <matt@guitsaru.com>
-Installs DragonRuby dependencies
+Create games and share packages with the DragonRuby community
 
 USAGE:
     smaug [FLAGS] [SUBCOMMAND]
