@@ -1,27 +1,21 @@
-use derive_more::Display;
-use derive_more::Error;
-use std::env;
-use std::path::Path;
-use std::path::PathBuf;
 use crate::command::Command;
 use crate::command::CommandResult;
 use clap::ArgMatches;
+use derive_more::Display;
+use derive_more::Error;
 use log::*;
-use toml_edit::{Document, value, table};
+use serde::Deserialize;
+use std::env;
+use std::path::Path;
+use std::path::PathBuf;
+use toml_edit::{value, Document};
 
 #[derive(Debug, Display, Error)]
 pub enum Error {
     #[display(fmt = "Could not find Smaug.toml at {}", "config_path.display()")]
-    FileNotFound { config_path: PathBuf }/*,
-    #[display(
-        fmt = "Could not parse Smaug.toml at {}: {}",
-        "path.display()",
-        "parent"
-    )]
-    ParseError {
-        path: PathBuf,
-        parent: toml::de::Error,
-    },*/
+    FileNotFound { config_path: PathBuf },
+    #[display(fmt = "{} has already been added to this project.", "name")]
+    AlreadyAdded { name: String },
 }
 
 #[derive(Debug)]
@@ -44,31 +38,77 @@ impl Command for Add {
 
         if !config_path.is_file() {
             return Err(Box::new(Error::FileNotFound { config_path }));
-            //Err(Error::FileNotFound { config_path });
-            //Err(err) => Err(Box::new(config_path));
         }
 
-        let config = std::fs::read_to_string(config_path.clone()).expect("Could not read Smaug.toml");
+        let config =
+            std::fs::read_to_string(config_path.clone()).expect("Could not read Smaug.toml");
 
-        //let config = smaug::config::load(&config_path)?;
-        debug!("Smaug config: {:?}", config);
+        let package_name = matches.value_of("PACKAGE").expect("No package given");
+        let latest_version = fetch_from_registry(package_name.to_string())?;
+
+        trace!("Latest version: {}", latest_version);
 
         let mut doc = config.parse::<Document>().expect("invalid doc");
         assert_eq!(doc.to_string(), config);
 
-        //doc["dependencies"].as_table_mut().unwrap().push(value("1.0.0"));
-        
-        doc["dependencies"] = table();
-        doc["dependencies"]["hello"] = value("2.2.2");
+        {
+            let dependencies = doc["dependencies"].as_table().expect("No dependencies");
 
-        debug!("Smaug config: {:?}", doc.to_string());
+            debug!("Dependencies: {:?}", dependencies);
 
+            if dependencies.contains_key(package_name) {
+                return Err(Box::new(Error::AlreadyAdded {
+                    name: package_name.to_string(),
+                }));
+            }
+        }
 
-        //config["a"]["b"]["c"]["d"] = value("hello");
+        doc["dependencies"][package_name] = value(latest_version.clone());
 
-        
+        std::fs::write(config_path, doc.to_string_in_original_order())?;
 
+        Ok(Box::new(format!(
+            "Added {} version {} to your project.\nRun smaug install to install it",
+            package_name, latest_version
+        )))
+    }
+}
 
-        Ok(Box::new("Stub add command is working!"))
+#[derive(Debug, Deserialize)]
+struct VersionResponse {
+    version: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct PackageResponse {
+    version: VersionResponse,
+}
+
+fn fetch_from_registry(name: String) -> std::io::Result<String> {
+    let url = format!("https://api.smaug.dev/packages/{}", name);
+    trace!("Fetching latest version from {}", url);
+
+    let response = reqwest::blocking::get(url.as_str());
+
+    match response {
+        Err(..) => Err(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            "couldn't find package",
+        )),
+        Ok(response) => parse_response(response, name),
+    }
+}
+
+fn parse_response(response: reqwest::blocking::Response, name: String) -> std::io::Result<String> {
+    if response.status().is_success() {
+        let package_response: PackageResponse =
+            response.json().expect("Couldn't parse registry response");
+
+        Ok(package_response.version.version)
+    } else {
+        Err(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            format!("Couldn't fetch {} from repository", name),
+        ))
     }
 }
