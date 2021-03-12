@@ -68,7 +68,7 @@ impl Command for Add {
         std::fs::write(config_path, doc.to_string_in_original_order())?;
 
         Ok(Box::new(format!(
-            "Added {} version {} to your project.\nRun smaug install to install it",
+            "Added {} version {} to your project.\nRun smaug install to install it.",
             package_name, latest_version
         )))
     }
