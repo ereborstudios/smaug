@@ -13,5 +13,5 @@ url = "TODO: Package Website"
 # "lib/library.rb" = "app/lib/library.rb"
 
 [dragonruby]
-version = "{ version }"
-edition = "{ edition }"
+version = "2"
+edition = "standard"
