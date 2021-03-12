@@ -72,10 +72,8 @@ impl Source for GitSource {
                 .revparse_single(&tag)
                 .expect("Couldn't parse tag");
 
-            let object = rev.as_tag().expect("Couldn't convert to tag").as_object();
-
             repository
-                .reset(object, git2::ResetType::Hard, Some(&mut checkout))
+                .reset(&rev, git2::ResetType::Hard, Some(&mut checkout))
                 .unwrap();
         }
 

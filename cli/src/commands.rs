@@ -7,3 +7,4 @@ pub mod new;
 pub mod package;
 pub mod publish;
 pub mod run;
+pub mod add;

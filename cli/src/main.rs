@@ -10,7 +10,9 @@ use crate::commands::package::Package;
 use crate::commands::run::Run;
 use clap::clap_app;
 use commands::install::Install;
-use commands::{build::Build, dragonruby::DragonRuby, init::Init, new::New, publish::Publish};
+use commands::{
+    add::Add, build::Build, dragonruby::DragonRuby, init::Init, new::New, publish::Publish,
+};
 use log::*;
 
 fn main() {
@@ -85,9 +87,19 @@ fn main() {
             (@arg FILE: +required "The file to generate bindings for.")
             (@arg DRAGONRUBY_ARGS: ... "dragonruby-publish command options")
         )
+        (@subcommand add =>
+            (about: "Adds a dependency to the project.")
+            (@arg path: --path -p +takes_value "The path to your project. Defaults to the current directory.")
+            (@arg PACKAGE: +required "The package to add to your project's dependencies")
+        )
         (@subcommand install =>
             (about: "Installs dependencies from Smaug.toml.")
             (@arg path: --path -p +takes_value "The path to your project. Defaults to the current directory.")
+        )
+        (@subcommand add =>
+            (about: "Add a dependency to Smaug.toml")
+            (@arg path: --path -p +takes_value "The path to your project. Defaults to the current directory.")
+            (@arg PACKAGE: +required "The location of a package to add")
         )
     )
     .get_matches();
@@ -103,6 +115,7 @@ fn main() {
         Some("package") => Box::new(Package),
         Some("publish") => Box::new(Publish),
         Some("run") => Box::new(Run),
+        Some("add") => Box::new(Add),
         Some("bind") => Box::new(Bind),
         _ => unreachable!(),
     };
