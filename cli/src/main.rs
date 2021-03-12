@@ -5,6 +5,7 @@ mod commands;
 mod game_metadata;
 
 use crate::command::Command;
+use crate::commands::bind::Bind;
 use crate::commands::package::Package;
 use crate::commands::run::Run;
 use clap::clap_app;
@@ -16,7 +17,7 @@ fn main() {
     let matches = clap_app!(smaug =>
         (version: "0.1.0")
         (author: "Matt Pruitt <matt@guitsaru.com>")
-        (about: "Installs DragonRuby dependencies")
+        (about: "Create games and share packages with the DragonRuby community")
         (setting: clap::AppSettings::ArgRequiredElseHelp)
 
         (@arg verbose: -v... --verbose... +global takes_value(false) "Displays more information")
@@ -75,6 +76,15 @@ fn main() {
             (@arg path: --path -p +takes_value "The path to your project. Defaults to the current directory.")
             (@arg DRAGONRUBY_ARGS: ... "dragonruby-publish command options")
         )
+        (@subcommand bind =>
+            (about: "Create bindings for c extensions (Pro only)")
+            (setting: clap::AppSettings::TrailingVarArg)
+            (setting: clap::AppSettings::AllowLeadingHyphen)
+            (@arg path: --path -p +takes_value "The path to your project. Defaults to the current directory.")
+            (@arg output: --output -o +required +takes_value "The location of the generated bindings.")
+            (@arg FILE: +required "The file to generate bindings for.")
+            (@arg DRAGONRUBY_ARGS: ... "dragonruby-publish command options")
+        )
         (@subcommand install =>
             (about: "Installs dependencies from Smaug.toml.")
             (@arg path: --path -p +takes_value "The path to your project. Defaults to the current directory.")
@@ -99,6 +109,7 @@ fn main() {
         Some("publish") => Box::new(Publish),
         Some("run") => Box::new(Run),
         Some("add") => Box::new(Add),
+        Some("bind") => Box::new(Bind),
         _ => unreachable!(),
     };
 
@@ -118,9 +129,10 @@ fn main() {
 fn print_message() {
     info!("");
     info!("Thanks for using Smaug!");
-    info!("🦗 Find a bug? File an issue: https://github.com/guitsaru/smaug/issues");
-    info!("🙋 Have a question? Start a discussion: https://github.com/guitsaru/smaug/discussions");
-    info!("💬 Want to chat? Join us on Discord: https://discord.gg/3MEsGjxZ");
+    info!("📦 Explore the package registry at https://smaug.dev/");
+    info!("🦗 Find a bug? File an issue: https://github.com/ereborstudios/smaug/issues");
+    info!("🙋 Have a question? Start a discussion: https://github.com/ereborstudios/smaug/discussions");
+    info!("💬 Want to chat? Join us on Discord: https://discord.gg/fQdZcgJf");
     info!("");
 }
 
