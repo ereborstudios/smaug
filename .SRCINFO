@@ -9,7 +9,7 @@ pkgbase = smaug
 	depends = openssl
 	depends = zlib
 	source = https://github.com/ereborstudios/smaug/releases/download/v0.2.0/smaug-linux
-	sha512sums = ed0d7171ba03b375a525498e5c4b1b3cfc8d30abfe58369ee8120b71de434d2f9c5a13eb6397fe4f70c5c89dbc45d1a4e916321223c8958483b393a1ec2a77cb
+	sha512sums = c564f9cab51740e9acb26c57c48ca31e2a662f993bd63d2f5662173c13ddd554a1e84bd57f8af71db6e44d518e2d1f79ee65ea56ae6273bfb8907449c3fa9a9a
 
 pkgname = smaug
 
