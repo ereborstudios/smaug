@@ -69,10 +69,11 @@ impl Command for Build {
                 let bin = bin_dir.join(dragonruby::dragonruby_publish_name());
 
                 trace!(
-                    "Spawning Process {} {} {}",
+                    "Spawning Process {} {} {} {}",
                     bin.to_str().unwrap(),
                     "--only-package",
-                    path.to_str().unwrap()
+                    path.to_str().unwrap(),
+                    dragonruby_options.join(" "),
                 );
                 process::Command::new(bin)
                     .current_dir(bin_dir.to_str().unwrap())

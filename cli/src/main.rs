@@ -5,6 +5,7 @@ mod commands;
 mod game_metadata;
 
 use crate::command::Command;
+use crate::commands::bind::Bind;
 use crate::commands::package::Package;
 use crate::commands::run::Run;
 use clap::clap_app;
@@ -75,6 +76,15 @@ fn main() {
             (@arg path: --path -p +takes_value "The path to your project. Defaults to the current directory.")
             (@arg DRAGONRUBY_ARGS: ... "dragonruby-publish command options")
         )
+        (@subcommand bind =>
+            (about: "Create bindings for c extensions (Pro only)")
+            (setting: clap::AppSettings::TrailingVarArg)
+            (setting: clap::AppSettings::AllowLeadingHyphen)
+            (@arg path: --path -p +takes_value "The path to your project. Defaults to the current directory.")
+            (@arg output: --output -o +required +takes_value "The location of the generated bindings.")
+            (@arg FILE: +required "The file to generate bindings for.")
+            (@arg DRAGONRUBY_ARGS: ... "dragonruby-publish command options")
+        )
         (@subcommand install =>
             (about: "Installs dependencies from Smaug.toml.")
             (@arg path: --path -p +takes_value "The path to your project. Defaults to the current directory.")
@@ -93,6 +103,7 @@ fn main() {
         Some("package") => Box::new(Package),
         Some("publish") => Box::new(Publish),
         Some("run") => Box::new(Run),
+        Some("bind") => Box::new(Bind),
         _ => unreachable!(),
     };
 
