@@ -172,13 +172,54 @@ fn parse_dragonruby_zip(path: &Path) -> DragonRubyResult {
     rm_rf::ensure_removed(cache.clone()).expect("Couldn't clear cache");
     zip_extensions::zip_extract(&path.to_path_buf(), &cache).expect("Could not extract zip");
     trace!("Unzipped DragonRuby to {}", cache.display());
-    let mut dir = fs::read_dir(cache.as_path()).expect("Could not read from cache");
-    let unzipped_to = dir
-        .next()
-        .expect("DragonRuby zip had no files.")
-        .expect("DragonRuby zip had no files");
 
-    parse_dragonruby_dir(&unzipped_to.path())
+    parse_dragonruby_dir(&cache)
+}
+
+fn find_base_dir(path: &Path) -> io::Result<PathBuf> {
+    if !path.is_dir() {
+        return Err(io::Error::new(
+            io::ErrorKind::NotFound,
+            "did not pass in a directory",
+        ));
+    }
+
+    let files = path.read_dir()?;
+
+    for entry in files {
+        let entry = entry?.path();
+        trace!("Looking for dragonruby at {:?}", entry);
+
+        if entry.is_dir() {
+            let bd = find_base_dir(entry.as_path());
+
+            if bd.is_ok() {
+                return bd;
+            }
+        } else if entry
+            .file_name()
+            .expect("entry did not have a file name")
+            .to_string_lossy()
+            == dragonruby_bin_name()
+        {
+            let parent = entry.parent();
+
+            match parent {
+                Some(parent_path) => return Ok(parent_path.to_path_buf()),
+                None => {
+                    return Err(io::Error::new(
+                        io::ErrorKind::NotFound,
+                        "could not find DragonRuby directory",
+                    ))
+                }
+            }
+        }
+    }
+
+    Err(io::Error::new(
+        io::ErrorKind::NotFound,
+        "could not find DragonRuby directory",
+    ))
 }
 
 fn parse_dragonruby_dir(path: &Path) -> DragonRubyResult {
@@ -186,21 +227,32 @@ fn parse_dragonruby_dir(path: &Path) -> DragonRubyResult {
     let edition: Edition;
 
     if !path.is_dir() {
+        trace!("{:?} is not a directory", path);
         return Err(DragonRubyError::DragonRubyNotFound {
             path: path.to_path_buf(),
         });
     };
 
-    let dragonruby_bin = path.join(dragonruby_bin_name());
+    let base_path = match find_base_dir(path) {
+        Ok(base) => base,
+        Err(_) => {
+            trace!("No base path found");
+            return Err(DragonRubyError::DragonRubyNotFound {
+                path: path.to_path_buf(),
+            });
+        }
+    };
+
+    let dragonruby_bin = base_path.join(dragonruby_bin_name());
     debug!("DragonRuby bin {}", dragonruby_bin.display());
-    let dragonruby_bind_bin = path.join(dragonruby_bind_name());
+    let dragonruby_bind_bin = base_path.join(dragonruby_bind_name());
     debug!("DragonRuby Bind bin {}", dragonruby_bind_bin.display());
-    let changelog = path.join("CHANGELOG.txt");
+    let changelog = base_path.join("CHANGELOG.txt");
     debug!("Changelog {}", changelog.display());
 
     if !dragonruby_bin.exists() || !changelog.exists() {
         return Err(DragonRubyError::DragonRubyNotFound {
-            path: path.to_path_buf(),
+            path: base_path.to_path_buf(),
         });
     };
 
@@ -229,7 +281,7 @@ fn parse_dragonruby_dir(path: &Path) -> DragonRubyResult {
     }
 
     let dragonruby = DragonRuby {
-        path: path.to_path_buf(),
+        path: base_path.to_path_buf(),
         version: Version { edition, version },
     };
 
