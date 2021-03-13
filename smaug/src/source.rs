@@ -42,7 +42,19 @@ pub trait Source: SourceClone {
             resolver.installs.push(install);
         }
 
-        let mut requires = package.requires;
+        let mut requires = package
+            .requires
+            .iter()
+            .map(|require| {
+                let package_file = destination.join(require);
+
+                if package_file.exists() {
+                    format!("smaug/{}/{}", dependency.name, require)
+                } else {
+                    require.to_string()
+                }
+            })
+            .collect();
         resolver.requires.append(&mut requires);
     }
 }
