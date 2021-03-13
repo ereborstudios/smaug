@@ -4,7 +4,7 @@ name = "{ name }"
 # The game's title. This will show up in the tile bar of your executable.
 title = "{ name }"
 version = "0.1.0"
-authors = ["TODO: My Name"]
+authors = ["TODO: My Name <todo@example.com>"]
 icon = "metadata/icon.png"
 
 [dragonruby]
