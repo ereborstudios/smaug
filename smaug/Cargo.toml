@@ -1,6 +1,6 @@
 [package]
 name = "smaug"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Matt Pruitt <matt@guitsaru.com>"]
 edition = "2018"
 
