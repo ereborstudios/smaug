@@ -7,3 +7,4 @@ gameid={ gameid }
 gametitle={ gametitle }
 version={ version}
 icon={ icon }
+compile_ruby={ compile_ruby }

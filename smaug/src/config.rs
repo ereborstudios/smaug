@@ -49,6 +49,7 @@ pub struct Project {
     pub version: String,
     pub authors: Vec<String>,
     pub icon: String,
+    pub compile_ruby: bool,
 }
 
 #[derive(Debug, Deserialize)]

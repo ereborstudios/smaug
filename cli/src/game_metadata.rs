@@ -11,6 +11,7 @@ pub struct GameMetadata {
     pub gametitle: String,
     pub version: String,
     pub icon: String,
+    pub compile_ruby: bool,
 }
 
 pub fn from_config(config: &Config) -> GameMetadata {
@@ -25,6 +26,7 @@ pub fn from_config(config: &Config) -> GameMetadata {
         gametitle: project.title,
         version: project.version,
         icon: project.icon,
+        compile_ruby: project.compile_ruby,
     }
 }
 
