@@ -2,6 +2,7 @@ use crate::dependency::Dependency;
 use crate::source::Source;
 use crate::sources::dir_source::DirSource;
 use log::*;
+use std::path::Path;
 use std::path::PathBuf;
 use walkdir::WalkDir;
 use zip_extensions::zip_extract;
@@ -12,7 +13,7 @@ pub struct FileSource {
 }
 
 impl Source for FileSource {
-    fn install(&self, dependency: &Dependency, destination: &PathBuf) -> std::io::Result<()> {
+    fn install(&self, dependency: &Dependency, destination: &Path) -> std::io::Result<()> {
         trace!("Installing file at {}", self.path.display());
         let cached = crate::smaug::cache_dir().join(dependency.clone().name);
 
@@ -36,7 +37,7 @@ impl Source for FileSource {
     }
 }
 
-fn find_package_dir(path: &PathBuf) -> Option<PathBuf> {
+fn find_package_dir(path: &Path) -> Option<PathBuf> {
     for entry in WalkDir::new(path) {
         let entry = entry.unwrap();
 

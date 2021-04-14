@@ -7,12 +7,12 @@ use crate::{config::DependencyOptions, sources::git_source::GitSource};
 use crate::{dependency::Dependency, sources::url_source};
 use crate::{resolver::Resolver, sources::dir_source::DirSource};
 use log::*;
-use std::path::PathBuf;
+use std::path::Path;
 
 pub trait Source: SourceClone {
-    fn install(&self, dependency: &Dependency, path: &PathBuf) -> std::io::Result<()>;
+    fn install(&self, dependency: &Dependency, path: &Path) -> std::io::Result<()>;
 
-    fn installed(&self, dependency: &Dependency, destination: &PathBuf) -> bool {
+    fn installed(&self, dependency: &Dependency, destination: &Path) -> bool {
         let destination = destination.join(dependency.clone().name);
         destination.exists()
     }
@@ -21,7 +21,7 @@ pub trait Source: SourceClone {
         &self,
         resolver: &mut Resolver,
         dependency: &Dependency,
-        destination: &PathBuf,
+        destination: &Path,
     ) {
         let project_dir = destination.parent().unwrap();
         let destination = destination.join(dependency.clone().name);

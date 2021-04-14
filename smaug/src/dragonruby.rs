@@ -251,9 +251,7 @@ fn parse_dragonruby_dir(path: &Path) -> DragonRubyResult {
     debug!("Changelog {}", changelog.display());
 
     if !dragonruby_bin.exists() || !changelog.exists() {
-        return Err(DragonRubyError::DragonRubyNotFound {
-            path: base_path.to_path_buf(),
-        });
+        return Err(DragonRubyError::DragonRubyNotFound { path: base_path });
     };
 
     let changelog_contents =
@@ -281,7 +279,7 @@ fn parse_dragonruby_dir(path: &Path) -> DragonRubyResult {
     }
 
     let dragonruby = DragonRuby {
-        path: base_path.to_path_buf(),
+        path: base_path,
         version: Version { edition, version },
     };
 

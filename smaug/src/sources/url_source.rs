@@ -3,7 +3,7 @@ use crate::source::Source;
 use crate::sources::file_source::FileSource;
 use log::*;
 use std::fs::File;
-use std::path::PathBuf;
+use std::path::Path;
 
 #[derive(Clone, Debug)]
 pub struct UrlSource {
@@ -11,7 +11,7 @@ pub struct UrlSource {
 }
 
 impl Source for UrlSource {
-    fn install(&self, dependency: &Dependency, destination: &PathBuf) -> std::io::Result<()> {
+    fn install(&self, dependency: &Dependency, destination: &Path) -> std::io::Result<()> {
         trace!("Downloading Url from {}", self.url);
         let file_name = format!("{}.zip", dependency.clone().name);
         let cached = crate::smaug::cache_dir().join(file_name);
