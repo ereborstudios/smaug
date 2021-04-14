@@ -39,7 +39,7 @@ pub struct Package {
     #[serde(default)]
     pub installs: LinkedHashMap<RelativePathBuf, RelativePathBuf>,
     #[serde(default)]
-    pub requires: Vec<String>,
+    pub requires: Vec<RelativePathBuf>,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -112,11 +112,11 @@ pub fn load<P: AsRef<Path>>(path: &P) -> Result<Config, Error> {
     from_str(&contents, &path)
 }
 
-pub fn from_str<S: AsRef<str>>(contents: &S, path: &PathBuf) -> Result<Config, Error> {
+pub fn from_str<S: AsRef<str>>(contents: &S, path: &Path) -> Result<Config, Error> {
     match toml::from_str(contents.as_ref()) {
         Ok(config) => Ok(config),
         Err(err) => Err(Error::ParseError {
-            path: path.clone(),
+            path: path.to_path_buf(),
             parent: err,
         }),
     }

@@ -12,11 +12,11 @@ compile_ruby = false
 version = "{ version }"
 edition = "{ edition }"
 
+[dependencies]
+
 [itch]
 # The Project URL you set when you created the game on Itch.io. https://my-username.itch.io/my-game.
 # This will also be the name of your build files, so fill it out even if you aren't uploading to Itch.io.
 url = "todo-change-me"
 # Your username on Itch.io.
 username = "todo-change-me"
-
-[dependencies]
