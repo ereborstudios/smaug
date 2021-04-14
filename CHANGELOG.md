@@ -1,4 +1,4 @@
-# Version 0.2.2
+# Version 0.2.3
 
 * Fixed dragonruby install from itch.io package
 * Fixed issue with add with empty dependencies in config
