@@ -49,6 +49,7 @@ pub struct Project {
     pub version: String,
     pub authors: Vec<String>,
     pub icon: String,
+    #[serde(default)]
     pub compile_ruby: bool,
 }
 
