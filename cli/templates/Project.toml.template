@@ -6,6 +6,7 @@ title = "{ name }"
 version = "0.1.0"
 authors = ["TODO: My Name <todo@example.com>"]
 icon = "metadata/icon.png"
+compile_ruby = false
 
 [dragonruby]
 version = "{ version }"
