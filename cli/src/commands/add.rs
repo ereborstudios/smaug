@@ -1,5 +1,6 @@
 use crate::command::Command;
 use crate::command::CommandResult;
+use crate::commands::install::Install;
 use clap::ArgMatches;
 use derive_more::Display;
 use derive_more::Error;
@@ -66,6 +67,8 @@ impl Command for Add {
         doc["dependencies"][package_name] = value(latest_version.clone());
 
         std::fs::write(config_path, doc.to_string_in_original_order())?;
+
+        Install.run(matches)?;
 
         Ok(Box::new(format!(
             "Added {} version {} to your project.\nRun smaug install to install it.",
