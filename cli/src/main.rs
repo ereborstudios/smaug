@@ -139,7 +139,7 @@ fn print_message() {
     info!("📦 Explore the package registry at https://smaug.dev/");
     info!("🦗 Find a bug? File an issue: https://github.com/ereborstudios/smaug/issues");
     info!("🙋 Have a question? Start a discussion: https://github.com/ereborstudios/smaug/discussions");
-    info!("💬 Want to chat? Join us on Discord: https://discord.gg/fQdZcgJf");
+    info!("💬 Want to chat? Join us on Discord: https://discord.gg/rwT64EtDee");
     info!("");
 }
 
