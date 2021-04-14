@@ -46,11 +46,14 @@ pub trait Source: SourceClone {
             .requires
             .iter()
             .map(|require| {
-                let package_file = destination.join(require);
+                let package_file = require.to_path(destination.clone());
+                trace!("Checking package file {:?}", package_file);
 
                 if package_file.exists() {
+                    trace!("package file exists");
                     format!("smaug/{}/{}", dependency.name, require)
                 } else {
+                    trace!("package file does not exists");
                     require.to_string()
                 }
             })

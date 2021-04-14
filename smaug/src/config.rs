@@ -39,7 +39,7 @@ pub struct Package {
     #[serde(default)]
     pub installs: LinkedHashMap<RelativePathBuf, RelativePathBuf>,
     #[serde(default)]
-    pub requires: Vec<String>,
+    pub requires: Vec<RelativePathBuf>,
 }
 
 #[derive(Clone, Debug, Deserialize)]
