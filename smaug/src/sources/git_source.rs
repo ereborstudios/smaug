@@ -6,7 +6,7 @@ use git2::build::RepoBuilder;
 use git2::FetchOptions;
 use git2::Oid;
 use log::*;
-use std::path::PathBuf;
+use std::path::Path;
 
 #[derive(Clone, Debug)]
 pub struct GitSource {
@@ -17,7 +17,7 @@ pub struct GitSource {
 }
 
 impl Source for GitSource {
-    fn install(&self, dependency: &Dependency, path: &PathBuf) -> std::io::Result<()> {
+    fn install(&self, dependency: &Dependency, path: &Path) -> std::io::Result<()> {
         let destination = crate::smaug::cache_dir().join(dependency.clone().name);
         trace!(
             "Installing git repository {} to {}",

@@ -3,7 +3,7 @@ use crate::source::Source;
 use crate::sources::git_source::GitSource;
 use log::*;
 use serde::Deserialize;
-use std::path::PathBuf;
+use std::path::Path;
 
 #[derive(Clone, Debug)]
 pub struct RegistrySource {
@@ -27,7 +27,7 @@ struct PackageResponse {
 }
 
 impl Source for RegistrySource {
-    fn install(&self, dependency: &Dependency, destination: &PathBuf) -> std::io::Result<()> {
+    fn install(&self, dependency: &Dependency, destination: &Path) -> std::io::Result<()> {
         trace!(
             "Fetching {} version {} from registry",
             dependency.clone().name,
