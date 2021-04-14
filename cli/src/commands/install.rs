@@ -1,17 +1,36 @@
 use crate::command::Command;
 use crate::command::CommandResult;
 use clap::ArgMatches;
+use derive_more::Display;
+use derive_more::Error;
 use log::*;
 use question::{Answer, Question};
 use resolver::Resolver;
 use serde::Serialize;
-use smaug::resolver;
+use smaug::{dependency::Dependency, resolver};
 use std::env;
 use std::path::Path;
+use std::path::PathBuf;
 use tinytemplate::TinyTemplate;
 
 #[derive(Debug)]
 pub struct Install;
+
+#[derive(Debug, Display, Serialize)]
+#[display(fmt = "Successfully installed your dependencies.")]
+pub struct InstallResult {
+    dependencies: Vec<Dependency>,
+}
+
+#[derive(Debug, Display, Error, Serialize)]
+enum Error {
+    #[display(fmt = "Failed to install your dependencies.")]
+    InstallFailed,
+    #[display(fmt = "Could not find Smaug.toml at {}", "path.display()")]
+    FileNotFound { path: PathBuf },
+    #[display(fmt = "Couldn't load Smaug configuration.")]
+    Config { path: PathBuf },
+}
 
 impl Command for Install {
     fn run(&self, matches: &ArgMatches) -> CommandResult {
@@ -22,26 +41,39 @@ impl Command for Install {
             .value_of("path")
             .unwrap_or_else(|| current_directory.to_str().unwrap());
         debug!("Directory: {}", directory);
-        let canonical = std::fs::canonicalize(directory)?;
+        let canonical = match std::fs::canonicalize(directory) {
+            Ok(dir) => dir,
+            Err(..) => {
+                return Err(Box::new(Error::FileNotFound {
+                    path: Path::new(directory).to_path_buf(),
+                }))
+            }
+        };
         let path = Path::new(&canonical);
         let path = std::fs::canonicalize(&path).expect("Could not find path");
 
         let config_path = path.join("Smaug.toml");
 
-        let config = smaug::config::load(&config_path)?;
+        let config = match smaug::config::load(&config_path) {
+            Ok(config) => config,
+            Err(..) => return Err(Box::new(Error::Config { path: config_path })),
+        };
         debug!("Smaug config: {:?}", config);
 
         let mut registry = resolver::new_from_config(&config);
 
         match registry.install(path.join("smaug")) {
-            Ok(()) => {
+            Ok(dependencies) => {
                 debug!("{:?}", registry.requires);
-                install_files(&registry)?;
+                if install_files(&registry).is_err() {
+                    return Err(Box::new(Error::InstallFailed));
+                }
+
                 write_index(&registry, &path);
 
-                Ok(Box::new("Successfully installed your dependencies."))
+                Ok(Box::new(InstallResult { dependencies }))
             }
-            Err(err) => Err(Box::new(err)),
+            Err(..) => Err(Box::new(Error::InstallFailed)),
         }
     }
 }

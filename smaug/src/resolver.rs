@@ -22,7 +22,7 @@ pub struct Install {
 }
 
 impl Resolver {
-    pub fn install(&mut self, destination: PathBuf) -> std::io::Result<()> {
+    pub fn install(&mut self, destination: PathBuf) -> std::io::Result<Vec<Dependency>> {
         info!("Installing Dependencies\n");
 
         let reqs = self.requirements.clone();
@@ -43,7 +43,7 @@ impl Resolver {
 
         info!("");
 
-        Ok(())
+        Ok(reqs)
     }
 
     pub fn add_source(&mut self, name: String, source: Box<dyn Source>) {

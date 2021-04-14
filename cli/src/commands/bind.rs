@@ -4,15 +4,18 @@ use clap::ArgMatches;
 use derive_more::Display;
 use derive_more::Error;
 use log::*;
+use serde::Serialize;
 use smaug::dragonruby;
 use std::env;
 use std::path::Path;
+use std::path::PathBuf;
 use std::process;
 
-#[derive(Debug)]
+#[derive(Debug, Display, Serialize)]
+#[display(fmt = "Succesfully created bindings.")]
 pub struct Bind;
 
-#[derive(Debug, Display, Error)]
+#[derive(Debug, Display, Error, Serialize)]
 pub enum Error {
     #[display(
         fmt = "Could not find the configured version of DragonRuby. Install it with `smaug dragonruby install`"
@@ -20,6 +23,10 @@ pub enum Error {
     ConfiguredDragonRubyNotFound,
     #[display(fmt = "The bind command is only available for DragonRuby pro.")]
     DragonRubyNotPro,
+    #[display(fmt = "Couldn't load Smaug configuration.")]
+    ConfigError { path: PathBuf },
+    #[display(fmt = "Could not find file at {}", "path.display()")]
+    FileNotFound { path: PathBuf },
 }
 
 impl Command for Bind {
@@ -39,12 +46,22 @@ impl Command for Bind {
             .value_of("path")
             .unwrap_or_else(|| current_directory.to_str().unwrap());
         debug!("Directory: {}", directory);
-        let path = Path::new(directory);
-        let path = std::fs::canonicalize(&path).expect("Could not find path");
+        let path = match std::fs::canonicalize(directory) {
+            Ok(dir) => dir,
+            Err(..) => {
+                return Err(Box::new(Error::FileNotFound {
+                    path: Path::new(directory).to_path_buf(),
+                }))
+            }
+        };
 
         let config_path = path.join("Smaug.toml");
 
-        let config = smaug::config::load(&config_path)?;
+        let config = match smaug::config::load(&config_path) {
+            Ok(config) => config,
+            Err(..) => return Err(Box::new(Error::ConfigError { path: config_path })),
+        };
+
         debug!("Smaug config: {:?}", config);
 
         let project_output = path.join(output);
@@ -77,17 +94,27 @@ impl Command for Bind {
                     project_input.display(),
                     dragonruby_options.join(" ")
                 );
+
+                let quiet = matches.is_present("json") || matches.is_present("quiet");
+
+                let stdout = if quiet {
+                    process::Stdio::null()
+                } else {
+                    process::Stdio::inherit()
+                };
+
                 process::Command::new(bin)
                     .current_dir(bin_dir.to_str().unwrap())
                     .arg(format!("--output={}", project_output.display()))
                     .arg(project_input)
                     .args(dragonruby_options)
+                    .stdout(stdout)
                     .spawn()
                     .unwrap()
                     .wait()
                     .unwrap();
 
-                Ok(Box::new("Successfully created bindings."))
+                Ok(Box::new(Bind {}))
             }
         }
     }

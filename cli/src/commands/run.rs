@@ -4,20 +4,30 @@ use clap::ArgMatches;
 use derive_more::Display;
 use derive_more::Error;
 use log::*;
+use serde::Serialize;
 use smaug::dragonruby;
 use std::env;
 use std::path::Path;
+use std::path::PathBuf;
 use std::process;
 
 #[derive(Debug)]
 pub struct Run;
 
-#[derive(Debug, Display, Error)]
+#[derive(Debug, Serialize, Display)]
+#[display(fmt = "Ran project {}", "project_name")]
+pub struct RunResult {
+    project_name: String,
+}
+
+#[derive(Debug, Display, Error, Serialize)]
 pub enum Error {
     #[display(
         fmt = "Could not find the configured version of DragonRuby. Install it with `smaug dragonruby install`"
     )]
     ConfiguredDragonRubyNotFound,
+    #[display(fmt = "Couldn't load Smaug configuration.")]
+    ConfigError { path: PathBuf },
 }
 
 impl Command for Run {
@@ -41,7 +51,10 @@ impl Command for Run {
 
         let config_path = path.join("Smaug.toml");
 
-        let config = smaug::config::load(&config_path)?;
+        let config = match smaug::config::load(&config_path) {
+            Ok(config) => config,
+            Err(..) => return Err(Box::new(Error::ConfigError { path: config_path })),
+        };
         debug!("Smaug config: {:?}", config);
 
         let metadata_file = path.join("metadata").join("game_metadata.txt");
@@ -81,9 +94,18 @@ impl Command for Run {
                     dragonruby_options.join(" ")
                 );
 
+                let quiet = matches.is_present("json") || matches.is_present("quiet");
+
+                let stdout = if quiet {
+                    process::Stdio::null()
+                } else {
+                    process::Stdio::inherit()
+                };
+
                 process::Command::new(bin)
                     .arg(path.clone())
                     .args(dragonruby_options)
+                    .stdout(stdout)
                     .spawn()
                     .unwrap()
                     .wait()
@@ -106,10 +128,9 @@ impl Command for Run {
                         .expect("couldn't copy exceptions");
                 }
 
-                Ok(Box::new(format!(
-                    "Ran project {}.",
-                    config.project.unwrap().name
-                )))
+                Ok(Box::new(RunResult {
+                    project_name: config.project.unwrap().name,
+                }))
             }
         }
     }

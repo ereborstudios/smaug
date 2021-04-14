@@ -17,12 +17,13 @@ use log::*;
 
 fn main() {
     let matches = clap_app!(smaug =>
-        (version: "0.2.3")
+        (version: "0.3.0")
         (author: "Matt Pruitt <matt@guitsaru.com>")
         (about: "Create games and share packages with the DragonRuby community")
         (setting: clap::AppSettings::ArgRequiredElseHelp)
 
         (@arg verbose: -v... --verbose... +global takes_value(false) "Displays more information")
+        (@arg json: --json +global takes_value(false) "Returns JSON")
         (@arg quiet: -q --quiet +global takes_value(false) "Silence all output")
 
         (@subcommand dragonruby =>
@@ -123,11 +124,24 @@ fn main() {
     let subcommand_matches = matches.subcommand_matches(matches.subcommand_name().unwrap());
 
     let result = command.run(&subcommand_matches.expect("No subcommand matches"));
+    let json = matches.is_present("json");
 
     info!("");
     match result {
-        Ok(message) => info!("{}", message),
-        Err(message) => error!("{}", message),
+        Ok(message) => {
+            if json {
+                print!("{}", message.to_json())
+            } else {
+                print!("{}", message.to_string())
+            }
+        }
+        Err(message) => {
+            if json {
+                print!("{{\"error\": {}}}", message.to_json())
+            } else {
+                print!("{}", message.to_string())
+            }
+        }
     }
 
     print_message()

@@ -6,21 +6,32 @@ use derive_more::Display;
 use derive_more::Error;
 use log::*;
 use serde::Deserialize;
+use serde::Serialize;
 use std::env;
 use std::path::Path;
 use std::path::PathBuf;
 use toml_edit::{value, Document};
 
-#[derive(Debug, Display, Error)]
+pub struct Add;
+
+#[derive(Debug, Display, Error, Serialize)]
 pub enum Error {
-    #[display(fmt = "Could not find Smaug.toml at {}", "config_path.display()")]
-    FileNotFound { config_path: PathBuf },
+    #[display(fmt = "Could not find Smaug.toml at {}", "path.display()")]
+    FileNotFound { path: PathBuf },
     #[display(fmt = "{} has already been added to this project.", "name")]
     AlreadyAdded { name: String },
+    #[display(fmt = "Could not fetch from registry.")]
+    RegistryError,
+    #[display(fmt = "Could not install packages.")]
+    InstallError,
 }
 
-#[derive(Debug)]
-pub struct Add;
+#[derive(Debug, Display, Serialize)]
+#[display(fmt = "Added {} {} to your project.", "package", "version")]
+pub struct AddResult {
+    package: String,
+    version: String,
+}
 
 impl Command for Add {
     fn run(&self, matches: &ArgMatches) -> CommandResult {
@@ -30,22 +41,35 @@ impl Command for Add {
         let directory: &str = matches
             .value_of("path")
             .unwrap_or_else(|| current_directory.to_str().unwrap());
+
         debug!("Directory: {}", directory);
-        let canonical = std::fs::canonicalize(directory)?;
+
+        let canonical = match std::fs::canonicalize(directory) {
+            Ok(dir) => dir,
+            Err(..) => {
+                return Err(Box::new(Error::FileNotFound {
+                    path: Path::new(directory).to_path_buf(),
+                }))
+            }
+        };
+
         let path = Path::new(&canonical);
         let path = std::fs::canonicalize(&path).expect("Could not find path");
 
         let config_path = path.join("Smaug.toml");
 
         if !config_path.is_file() {
-            return Err(Box::new(Error::FileNotFound { config_path }));
+            return Err(Box::new(Error::FileNotFound { path: config_path }));
         }
 
         let config =
             std::fs::read_to_string(config_path.clone()).expect("Could not read Smaug.toml");
 
         let package_name = matches.value_of("PACKAGE").expect("No package given");
-        let latest_version = fetch_from_registry(package_name.to_string())?;
+        let latest_version = match fetch_from_registry(package_name.to_string()) {
+            Ok(version) => version,
+            Err(..) => return Err(Box::new(Error::RegistryError)),
+        };
 
         trace!("Latest version: {}", latest_version);
 
@@ -66,14 +90,17 @@ impl Command for Add {
 
         doc["dependencies"][package_name] = value(latest_version.clone());
 
-        std::fs::write(config_path, doc.to_string_in_original_order())?;
+        std::fs::write(config_path, doc.to_string_in_original_order())
+            .expect("Couldn't write config file.");
 
-        Install.run(matches)?;
+        if Install.run(matches).is_err() {
+            return Err(Box::new(Error::InstallError));
+        }
 
-        Ok(Box::new(format!(
-            "Added {} version {} to your project.\nRun smaug install to install it.",
-            package_name, latest_version
-        )))
+        Ok(Box::new(AddResult {
+            package: package_name.to_string(),
+            version: latest_version,
+        }))
     }
 }
 

@@ -1,19 +1,37 @@
 use crate::command::Command;
 use crate::command::CommandResult;
 use clap::ArgMatches;
+use derive_more::Display;
+use derive_more::Error;
 use log::*;
+use serde::Serialize;
 use std::path::Path;
+use std::path::PathBuf;
 
 #[derive(Debug)]
 pub struct New;
+
+#[derive(Debug, Display, Error, Serialize)]
+enum Error {
+    #[display(fmt = "DragonRuby is not installed. See smaug dragonruby help install for details.")]
+    DragonRubyNotFound,
+    #[display(fmt = "Project initialization failed")]
+    InitFailed,
+}
+
+#[derive(Debug, Serialize, Display)]
+#[display(fmt = "Created your new DragonRuby project.")]
+pub struct NewResult {
+    path: PathBuf,
+}
 
 impl Command for New {
     fn run(&self, matches: &ArgMatches) -> CommandResult {
         trace!("New Command");
 
         let latest = smaug::dragonruby::latest();
-        if let Err(e) = latest {
-            return Err(Box::new(e));
+        if let Err(..) = latest {
+            return Err(Box::new(Error::DragonRubyNotFound {}));
         }
         let latest = latest.unwrap();
 
@@ -32,8 +50,12 @@ impl Command for New {
 
         std::fs::write(gitignore_path, gitignore).expect("Couldn't write .gitignore.");
 
-        crate::commands::init::Init.run(matches)?;
+        if crate::commands::init::Init.run(matches).is_err() {
+            return Err(Box::new(Error::InitFailed));
+        }
 
-        Ok(Box::new("Created your new DragonRuby project."))
+        Ok(Box::new(NewResult {
+            path: path.to_path_buf(),
+        }))
     }
 }

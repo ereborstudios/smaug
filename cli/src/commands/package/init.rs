@@ -1,12 +1,16 @@
 use crate::command::Command;
 use crate::command::CommandResult;
 use clap::ArgMatches;
+use derive_more::Display;
+use derive_more::Error;
 use log::*;
 use serde::Serialize;
 use std::env;
 use std::path::Path;
-
+use std::path::PathBuf;
 use tinytemplate::TinyTemplate;
+
+pub struct Init;
 
 #[derive(Serialize)]
 struct PackageConfig {
@@ -15,8 +19,17 @@ struct PackageConfig {
     name: String,
 }
 
-#[derive(Debug)]
-pub struct Init;
+#[derive(Debug, Display, Serialize)]
+#[display(fmt = "Initialized your DragonRuby Package")]
+pub struct InitResult {
+    path: PathBuf,
+}
+
+#[derive(Debug, Display, Error, Serialize)]
+enum Error {
+    #[display(fmt = "DragonRuby is not installed. See smaug dragonruby help install for details.")]
+    DragonRubyNotFound,
+}
 
 static TEMPLATE: &str = include_str!("../../../templates/Package.toml.template");
 
@@ -25,8 +38,8 @@ impl Command for Init {
         trace!("Init Command");
 
         let latest = smaug::dragonruby::latest();
-        if let Err(e) = latest {
-            return Err(Box::new(e));
+        if let Err(..) = latest {
+            return Err(Box::new(Error::DragonRubyNotFound {}));
         }
         let latest = latest.unwrap();
 
@@ -68,6 +81,8 @@ impl Command for Init {
         trace!("Writing configuration to {}", config_path.display());
         std::fs::write(config_path, rendered).expect("Could not write file");
 
-        Ok(Box::new("Initialized your DragonRuby package."))
+        Ok(Box::new(InitResult {
+            path: path.to_path_buf(),
+        }))
     }
 }
