@@ -8,24 +8,28 @@ use clap::ArgMatches;
 use install::Install;
 use list::List;
 use log::*;
+use serde::Serialize;
+use std::fmt::Display;
 use uninstall::Uninstall;
 
 #[derive(Debug)]
 pub struct DragonRuby;
 
+trait Result: Display + Serialize {}
+
 impl Command for DragonRuby {
     fn run(&self, matches: &ArgMatches) -> CommandResult {
         trace!("Dragon Ruby Command");
 
-        let command: Box<dyn Command> = match matches.subcommand_name() {
-            Some("install") => Box::new(Install),
-            Some("list") => Box::new(List),
-            Some("uninstall") => Box::new(Uninstall),
+        let subcommand_matches = matches
+            .subcommand_matches(matches.subcommand_name().unwrap())
+            .unwrap();
+
+        match matches.subcommand_name() {
+            Some("install") => Install.run(&subcommand_matches),
+            Some("list") => List.run(&subcommand_matches),
+            Some("uninstall") => Uninstall.run(&subcommand_matches),
             _ => unreachable!(),
-        };
-
-        let subcommand_matches = matches.subcommand_matches(matches.subcommand_name().unwrap());
-
-        command.run(&subcommand_matches.unwrap())
+        }
     }
 }

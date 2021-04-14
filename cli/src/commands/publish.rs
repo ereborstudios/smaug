@@ -4,21 +4,31 @@ use clap::ArgMatches;
 use derive_more::Display;
 use derive_more::Error;
 use log::*;
+use serde::Serialize;
 use smaug::dragonruby;
 use smaug::util::dir::copy_directory;
 use std::env;
 use std::path::Path;
+use std::path::PathBuf;
 use std::process;
 
 #[derive(Debug)]
 pub struct Publish;
 
-#[derive(Debug, Display, Error)]
+#[derive(Debug, Serialize, Display)]
+#[display(fmt = "Successfully published {} to Itch.io!", "project_name")]
+pub struct PublishResult {
+    project_name: String,
+}
+
+#[derive(Debug, Display, Error, Serialize)]
 pub enum Error {
     #[display(
         fmt = "Could not find the configured version of DragonRuby. Install it with `smaug dragonruby install`"
     )]
     ConfiguredDragonRubyNotFound,
+    #[display(fmt = "Couldn't load Smaug configuration.")]
+    ConfigError { path: PathBuf },
 }
 
 impl Command for Publish {
@@ -40,7 +50,11 @@ impl Command for Publish {
 
         let config_path = path.join("Smaug.toml");
 
-        let config = smaug::config::load(&config_path)?;
+        let config = match smaug::config::load(&config_path) {
+            Ok(config) => config,
+            Err(..) => return Err(Box::new(Error::ConfigError { path: config_path })),
+        };
+
         debug!("Smaug config: {:?}", config);
 
         trace!("Writing game metadata.");
@@ -73,10 +87,20 @@ impl Command for Publish {
                     bin.to_str().unwrap(),
                     path.to_str().unwrap()
                 );
+
+                let quiet = matches.is_present("json") || matches.is_present("quiet");
+
+                let stdout = if quiet {
+                    process::Stdio::null()
+                } else {
+                    process::Stdio::inherit()
+                };
+
                 process::Command::new(bin)
                     .current_dir(bin_dir.to_str().unwrap())
                     .arg(path.file_name().unwrap())
                     .args(dragonruby_options)
+                    .stdout(stdout)
                     .spawn()
                     .unwrap()
                     .wait()
@@ -104,10 +128,9 @@ impl Command for Publish {
 
                 rm_rf::ensure_removed(build_dir).expect("Could not clean up build dir");
 
-                Ok(Box::new(format!(
-                    "Successfully published {} to Itch.io!",
-                    config.project.unwrap().name
-                )))
+                Ok(Box::new(PublishResult {
+                    project_name: config.project.unwrap().name,
+                }))
             }
         }
     }

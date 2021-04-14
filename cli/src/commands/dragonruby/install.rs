@@ -4,8 +4,10 @@ use clap::ArgMatches;
 use derive_more::Display;
 use derive_more::Error;
 use log::*;
+use serde::Serialize;
 use smaug::dragonruby;
 use smaug::dragonruby::DragonRuby;
+use smaug::dragonruby::Version;
 use smaug::util::dir::copy_directory;
 use std::io;
 use std::path::Path;
@@ -14,8 +16,14 @@ use std::path::PathBuf;
 #[derive(Debug)]
 pub struct Install;
 
-#[derive(Debug, Display, Error)]
+#[derive(Debug, Serialize, Display)]
+#[display(fmt = "Installed DragonRuby {}", "version")]
+pub struct InstallResult {
+    version: Version,
+    path: PathBuf,
+}
 
+#[derive(Debug, Display, Error, Serialize)]
 enum Error {
     #[display(fmt = "Could not find DragonRuby at {}", "path.display()")]
     DragonRubyNotFound { path: PathBuf },
@@ -28,7 +36,10 @@ impl Command for Install {
         let dr = dragonruby::new(&path).expect("Couldn't find DragonRuby");
 
         match install(&dr) {
-            Ok(installed) => Ok(Box::new(format!("Installed {}", installed.version))),
+            Ok(installed) => Ok(Box::new(InstallResult {
+                version: installed.version,
+                path: dr.path,
+            })),
             Err(..) => Err(Box::new(Error::DragonRubyNotFound {
                 path: path.to_path_buf(),
             })),

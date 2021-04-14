@@ -4,6 +4,8 @@ use derive_more::Error;
 use log::*;
 use semver::Version as SemVer;
 use semver::VersionReq;
+use serde::Serialize;
+use serde::Serializer;
 use std::fs;
 use std::io;
 use std::path::Path;
@@ -284,4 +286,13 @@ fn parse_dragonruby_dir(path: &Path) -> DragonRubyResult {
     };
 
     Ok(dragonruby)
+}
+
+impl Serialize for Version {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(format!("{}", self).as_str())
+    }
 }
