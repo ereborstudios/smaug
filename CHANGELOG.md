@@ -1,6 +1,7 @@
 # Version 0.3.0
 
 * Add `--json` argument to all commands
+* Fix an issue with `smaug add` and Windows line endings
 
 # Version 0.2.3
 
