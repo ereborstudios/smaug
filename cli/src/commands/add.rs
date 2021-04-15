@@ -74,7 +74,6 @@ impl Command for Add {
         trace!("Latest version: {}", latest_version);
 
         let mut doc = config.parse::<Document>().expect("invalid doc");
-        assert_eq!(doc.to_string(), config);
 
         {
             let dependencies = doc["dependencies"].as_table().expect("No dependencies");
