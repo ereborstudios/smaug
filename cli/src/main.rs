@@ -20,7 +20,7 @@ fn main() {
         (version: "0.3.0")
         (author: "Matt Pruitt <matt@guitsaru.com>")
         (about: "Create games and share packages with the DragonRuby community")
-        (setting: clap::AppSettings::ArgRequiredElseHelp)
+        (setting: clap::AppSettings::SubcommandRequiredElseHelp)
 
         (@arg verbose: -v... --verbose... +global takes_value(false) "Displays more information")
         (@arg json: --json +global takes_value(false) "Returns JSON")
@@ -28,7 +28,7 @@ fn main() {
 
         (@subcommand dragonruby =>
             (about: "Manages your local DragonRuby installation.")
-            (setting: clap::AppSettings::ArgRequiredElseHelp)
+            (setting: clap::AppSettings::SubcommandRequiredElseHelp)
             (@subcommand install =>
                 (about: "Installs DragonRuby.")
                 (@arg FILE: +required "The location of the DragonRuby Game Toolkit zip file.")
@@ -43,7 +43,7 @@ fn main() {
         )
         (@subcommand package =>
             (about: "Manages your DragonRuby package.")
-            (setting: clap::AppSettings::ArgRequiredElseHelp)
+            (setting: clap::AppSettings::SubcommandRequiredElseHelp)
             (@subcommand init =>
                 (about: "Initializes an existing package as a Smaug project.")
                 (@arg PATH: "The path to your package. Defaults to the current directory.")
@@ -105,46 +105,47 @@ fn main() {
     )
     .get_matches();
 
-    start_log(&matches);
-
-    let command: Box<dyn Command> = match matches.subcommand_name() {
-        Some("build") => Box::new(Build),
-        Some("dragonruby") => Box::new(DragonRuby),
-        Some("init") => Box::new(Init),
-        Some("install") => Box::new(Install),
-        Some("new") => Box::new(New),
-        Some("package") => Box::new(Package),
-        Some("publish") => Box::new(Publish),
-        Some("run") => Box::new(Run),
-        Some("add") => Box::new(Add),
-        Some("bind") => Box::new(Bind),
-        _ => unreachable!(),
+    let command: Option<Box<dyn Command>> = match matches.subcommand_name() {
+        Some("build") => Some(Box::new(Build)),
+        Some("dragonruby") => Some(Box::new(DragonRuby)),
+        Some("init") => Some(Box::new(Init)),
+        Some("install") => Some(Box::new(Install)),
+        Some("new") => Some(Box::new(New)),
+        Some("package") => Some(Box::new(Package)),
+        Some("publish") => Some(Box::new(Publish)),
+        Some("run") => Some(Box::new(Run)),
+        Some("add") => Some(Box::new(Add)),
+        Some("bind") => Some(Box::new(Bind)),
+        _ => None,
     };
 
-    let subcommand_matches = matches.subcommand_matches(matches.subcommand_name().unwrap());
+    if let Some(cmd) = command {
+        start_log(&matches);
 
-    let result = command.run(&subcommand_matches.expect("No subcommand matches"));
-    let json = matches.is_present("json");
+        let subcommand_matches = matches.subcommand_matches(matches.subcommand_name().unwrap());
 
-    info!("");
-    match result {
-        Ok(message) => {
-            if json {
-                print!("{}", message.to_json())
-            } else {
-                print!("{}", message.to_string())
+        let json = matches.is_present("json");
+        let result = cmd.run(&subcommand_matches.expect("No subcommand matches"));
+
+        info!("");
+        match result {
+            Ok(message) => {
+                if json {
+                    print!("{}", message.to_json())
+                } else {
+                    print!("{}", message.to_string())
+                }
+            }
+            Err(message) => {
+                if json {
+                    print!("{{\"error\": {}}}", message.to_json())
+                } else {
+                    print!("{}", message.to_string())
+                }
             }
         }
-        Err(message) => {
-            if json {
-                print!("{{\"error\": {}}}", message.to_json())
-            } else {
-                print!("{}", message.to_string())
-            }
-        }
+        print_message()
     }
-
-    print_message()
 }
 
 fn print_message() {
