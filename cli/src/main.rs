@@ -11,13 +11,14 @@ use crate::commands::run::Run;
 use clap::clap_app;
 use commands::install::Install;
 use commands::{
-    add::Add, build::Build, dragonruby::DragonRuby, init::Init, new::New, publish::Publish,
+    add::Add, build::Build, config::Config, dragonruby::DragonRuby, init::Init, new::New,
+    publish::Publish,
 };
 use log::*;
 
 fn main() {
     let matches = clap_app!(smaug =>
-        (version: "0.3.0")
+        (version: "0.3.1")
         (author: "Matt Pruitt <matt@guitsaru.com>")
         (about: "Create games and share packages with the DragonRuby community")
         (setting: clap::AppSettings::SubcommandRequiredElseHelp)
@@ -102,6 +103,10 @@ fn main() {
             (@arg path: --path -p +takes_value "The path to your project. Defaults to the current directory.")
             (@arg PACKAGE: +required "The location of a package to add")
         )
+        (@subcommand config =>
+            (about: "Displays your current project's Smaug configuration")
+            (@arg path: --path -p +takes_value "The path to your project. Defaults to the current directory.")
+        )
     )
     .get_matches();
 
@@ -116,6 +121,7 @@ fn main() {
         Some("run") => Some(Box::new(Run)),
         Some("add") => Some(Box::new(Add)),
         Some("bind") => Some(Box::new(Bind)),
+        Some("config") => Some(Box::new(Config)),
         _ => None,
     };
 
@@ -131,16 +137,16 @@ fn main() {
         match result {
             Ok(message) => {
                 if json {
-                    print!("{}", message.to_json())
+                    println!("{}", message.to_json())
                 } else {
-                    print!("{}", message.to_string())
+                    println!("{}", message.to_string())
                 }
             }
             Err(message) => {
                 if json {
-                    print!("{{\"error\": {}}}", message.to_json())
+                    println!("{{\"error\": {}}}", message.to_json())
                 } else {
-                    print!("{}", message.to_string())
+                    error!("{}", message.to_string())
                 }
             }
         }

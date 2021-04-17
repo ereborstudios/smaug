@@ -9,11 +9,12 @@ use serde::de::Deserializer;
 use serde::de::MapAccess;
 use serde::de::Visitor;
 use serde::Deserialize;
+use serde::Serialize;
 use std::fmt;
 use std::path::Path;
 use std::path::PathBuf;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Config {
     pub package: Option<Package>,
     pub project: Option<Project>,
@@ -23,7 +24,7 @@ pub struct Config {
     pub dependencies: LinkedHashMap<String, DependencyOptions>,
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Package {
     pub name: String,
     pub description: Option<String>,
@@ -42,7 +43,7 @@ pub struct Package {
     pub requires: Vec<RelativePathBuf>,
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Project {
     pub name: String,
     pub title: String,
@@ -53,19 +54,19 @@ pub struct Project {
     pub compile_ruby: bool,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct DragonRuby {
     pub version: String,
     pub edition: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Itch {
     pub url: String,
     pub username: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub enum DependencyOptions {
     Dir {
         dir: PathBuf,
@@ -103,7 +104,14 @@ pub enum Error {
 }
 
 pub fn load<P: AsRef<Path>>(path: &P) -> Result<Config, Error> {
-    let path = std::fs::canonicalize(path.as_ref()).unwrap();
+    let canonical = std::fs::canonicalize(path.as_ref());
+    if canonical.is_err() {
+        return Err(Error::FileNotFound {
+            path: path.as_ref().to_path_buf(),
+        });
+    }
+
+    let path = canonical.unwrap();
     if !path.is_file() {
         return Err(Error::FileNotFound { path });
     }

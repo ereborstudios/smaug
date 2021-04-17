@@ -1,5 +1,7 @@
+pub mod add;
 pub mod bind;
 pub mod build;
+pub mod config;
 pub mod dragonruby;
 pub mod init;
 pub mod install;
@@ -7,4 +9,3 @@ pub mod new;
 pub mod package;
 pub mod publish;
 pub mod run;
-pub mod add;
