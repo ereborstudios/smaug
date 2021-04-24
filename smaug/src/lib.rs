@@ -1,4 +1,5 @@
 extern crate derive_more;
+extern crate ignore;
 extern crate regex;
 extern crate semver;
 extern crate shellexpand;
