@@ -1,6 +1,8 @@
 # Version 0.3.1
 
 * Add `config` command to show your current Smaug configuration
+* Respect `.smaugignore` file when building projects or installing packages
+
 # Version 0.3.0
 
 * Add `--json` argument to all commands
