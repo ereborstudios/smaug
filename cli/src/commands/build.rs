@@ -78,6 +78,7 @@ impl Command for Build {
                 let build_dir = bin_dir.join(path.file_name().unwrap());
 
                 copy_directory(&path, &build_dir).expect("Could not copy to build directory.");
+                debug!("Build Directory: {:?}", build_dir);
 
                 let log_dir = build_dir.join("logs");
                 let exception_dir = build_dir.join("exceptions");
