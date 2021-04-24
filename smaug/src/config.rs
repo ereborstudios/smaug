@@ -172,9 +172,9 @@ impl<'de> Deserialize<'de> for DependencyOptions {
                         tag: None,
                     })
                 } else if path.is_dir() {
-                    Ok(DependencyOptions::Dir {
-                        dir: path.to_path_buf(),
-                    })
+                    let canonical =
+                        std::fs::canonicalize(path.clone()).expect("Could not find path.");
+                    Ok(DependencyOptions::Dir { dir: canonical })
                 } else if path.is_file() {
                     Ok(DependencyOptions::File {
                         file: path.to_path_buf(),
