@@ -136,6 +136,10 @@ pub fn list_installed() -> io::Result<Vec<DragonRuby>> {
     Ok(versions)
 }
 
+pub fn dragonruby_docs_path() -> String {
+    "docs/docs.html".to_string()
+}
+
 pub fn dragonruby_bin_name() -> String {
     if cfg!(windows) {
         "dragonruby.exe".to_string()
