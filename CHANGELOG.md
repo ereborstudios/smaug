@@ -2,6 +2,7 @@
 
 * Add `config` command to show your current Smaug configuration
 * Respect `.smaugignore` file when building projects or installing packages
+* Add `docs` command to open the configured DragonRuby version's docs in your web browser.
 
 # Version 0.3.0
 

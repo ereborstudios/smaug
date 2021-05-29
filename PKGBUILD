@@ -1,6 +1,6 @@
 # Maintainer: Logan Koester <logan@logankoester.com>
 pkgname=smaug
-pkgver=0.3.0
+pkgver=0.3.1
 pkgrel=1
 pkgdesc="A tool to manage your DragonRuby Game Toolkit projects"
 arch=('x86_64')

@@ -113,10 +113,7 @@ pub fn configured_version(config: &Config) -> Option<DragonRuby> {
         .iter()
         .find(|v| version.matches(&v.version.version) && v.version.edition >= edition);
 
-    match matched {
-        Some(dragonruby) => Some(dragonruby.clone()),
-        None => None,
-    }
+    matched.map(|dragonruby| dragonruby.to_owned())
 }
 
 pub fn list_installed() -> io::Result<Vec<DragonRuby>> {
@@ -134,6 +131,10 @@ pub fn list_installed() -> io::Result<Vec<DragonRuby>> {
         .collect();
 
     Ok(versions)
+}
+
+pub fn dragonruby_docs_path() -> String {
+    "docs/docs.html".to_string()
 }
 
 pub fn dragonruby_bin_name() -> String {

@@ -29,6 +29,8 @@ pub enum Error {
     ConfiguredDragonRubyNotFound,
     #[display(fmt = "Couldn't load Smaug configuration.")]
     ConfigError { path: PathBuf },
+    #[display(fmt = "Publishing {} failed", "project_name")]
+    PublishError { project_name: String },
 }
 
 impl Command for Publish {
@@ -96,7 +98,7 @@ impl Command for Publish {
                     process::Stdio::inherit()
                 };
 
-                process::Command::new(bin)
+                let result = process::Command::new(bin)
                     .current_dir(bin_dir.to_str().unwrap())
                     .arg(path.file_name().unwrap())
                     .args(dragonruby_options)
@@ -128,9 +130,15 @@ impl Command for Publish {
 
                 rm_rf::ensure_removed(build_dir).expect("Could not clean up build dir");
 
-                Ok(Box::new(PublishResult {
-                    project_name: config.project.unwrap().name,
-                }))
+                if result.success() {
+                    Ok(Box::new(PublishResult {
+                        project_name: config.project.unwrap().name,
+                    }))
+                } else {
+                    Err(Box::new(Error::PublishError {
+                        project_name: config.project.unwrap().name,
+                    }))
+                }
             }
         }
     }

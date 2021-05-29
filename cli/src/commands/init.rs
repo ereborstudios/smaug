@@ -51,7 +51,7 @@ impl Command for Init {
             .value_of("PATH")
             .unwrap_or_else(|| current_directory.to_str().unwrap());
         debug!("Directory: {}", directory);
-        let path = Path::new(directory);
+        let path = Path::new(directory).canonicalize().unwrap();
 
         let mut tt = TinyTemplate::new();
         tt.add_template("Project.toml", TEMPLATE)
@@ -82,8 +82,12 @@ impl Command for Init {
         trace!("Writing configuration to {}", config_path.display());
         std::fs::write(config_path, rendered).expect("Could not write file");
 
-        Ok(Box::new(InitResult {
-            path: path.to_path_buf(),
-        }))
+        let smaugignore = include_str!("../../templates/smaugignore.template");
+        let smaugignore_path = path.join(".smaugignore");
+        trace!("Writing .smaugignore to {}", smaugignore_path.display());
+
+        std::fs::write(smaugignore_path, smaugignore).expect("Couldn't write .smaugignore.");
+
+        Ok(Box::new(InitResult { path }))
     }
 }

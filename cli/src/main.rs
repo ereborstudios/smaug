@@ -11,8 +11,8 @@ use crate::commands::run::Run;
 use clap::clap_app;
 use commands::install::Install;
 use commands::{
-    add::Add, build::Build, config::Config, dragonruby::DragonRuby, init::Init, new::New,
-    publish::Publish,
+    add::Add, build::Build, config::Config, docs::Docs, dragonruby::DragonRuby, init::Init,
+    new::New, publish::Publish,
 };
 use log::*;
 
@@ -107,6 +107,11 @@ fn main() {
             (about: "Displays your current project's Smaug configuration")
             (@arg path: --path -p +takes_value "The path to your project. Defaults to the current directory.")
         )
+
+        (@subcommand docs =>
+            (about: "Opens DragonRuby docs in your web browser")
+            (@arg path: --path -p +takes_value "The path to your project. Defaults to the current directory.")
+        )
     )
     .get_matches();
 
@@ -122,6 +127,7 @@ fn main() {
         Some("add") => Some(Box::new(Add)),
         Some("bind") => Some(Box::new(Bind)),
         Some("config") => Some(Box::new(Config)),
+        Some("docs") => Some(Box::new(Docs)),
         _ => None,
     };
 
