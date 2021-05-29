@@ -82,6 +82,12 @@ impl Command for Init {
         trace!("Writing configuration to {}", config_path.display());
         std::fs::write(config_path, rendered).expect("Could not write file");
 
+        let smaugignore = include_str!("../../templates/smaugignore.template");
+        let smaugignore_path = path.join(".smaugignore");
+        trace!("Writing .smaugignore to {}", smaugignore_path.display());
+
+        std::fs::write(smaugignore_path, smaugignore).expect("Couldn't write .smaugignore.");
+
         Ok(Box::new(InitResult {
             path: path.to_path_buf(),
         }))

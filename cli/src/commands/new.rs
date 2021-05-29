@@ -45,10 +45,15 @@ impl Command for New {
         smaug::util::dir::copy_directory(&source, &path.to_path_buf())
             .expect("Installed DragonRuby doesn't have mygame directory.");
 
-        let gitignore = include_str!("../../templates/gitignore");
+        let gitignore = include_str!("../../templates/gitignore.template");
         let gitignore_path = path.join(".gitignore");
 
         std::fs::write(gitignore_path, gitignore).expect("Couldn't write .gitignore.");
+
+        let smaugignore = include_str!("../../templates/smaugignore.template");
+        let smaugignore_path = path.join(".smaugignore");
+
+        std::fs::write(smaugignore_path, smaugignore).expect("Couldn't write .smaugignore.");
 
         if crate::commands::init::Init.run(matches).is_err() {
             return Err(Box::new(Error::InitFailed));
