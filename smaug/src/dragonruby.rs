@@ -113,10 +113,7 @@ pub fn configured_version(config: &Config) -> Option<DragonRuby> {
         .iter()
         .find(|v| version.matches(&v.version.version) && v.version.edition >= edition);
 
-    match matched {
-        Some(dragonruby) => Some(dragonruby.clone()),
-        None => None,
-    }
+    matched.map(|dragonruby| dragonruby.to_owned())
 }
 
 pub fn list_installed() -> io::Result<Vec<DragonRuby>> {
