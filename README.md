@@ -35,21 +35,26 @@ scoop install smaug
 # Usage
 
 ```
-smaug 0.1.0
+smaug 0.3.1
 Matt Pruitt <matt@guitsaru.com>
 Create games and share packages with the DragonRuby community
 
 USAGE:
-    smaug [FLAGS] [SUBCOMMAND]
+    smaug.exe [FLAGS] <SUBCOMMAND>
 
 FLAGS:
     -h, --help       Prints help information
+        --json       Returns JSON
     -q, --quiet      Silence all output
     -v, --verbose    Displays more information
     -V, --version    Prints version information
 
 SUBCOMMANDS:
+    add           Add a dependency to Smaug.toml
+    bind          Create bindings for c extensions (Pro only)
     build         Builds your DragonRuby project.
+    config        Displays your current project's Smaug configuration
+    docs          Opens DragonRuby docs in your web browser
     dragonruby    Manages your local DragonRuby installation.
     help          Prints this message or the help of the given subcommand(s)
     init          Initializes an existing project as a Smaug project.
