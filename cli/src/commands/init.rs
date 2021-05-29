@@ -51,7 +51,7 @@ impl Command for Init {
             .value_of("PATH")
             .unwrap_or_else(|| current_directory.to_str().unwrap());
         debug!("Directory: {}", directory);
-        let path = Path::new(directory);
+        let path = Path::new(directory).canonicalize().unwrap();
 
         let mut tt = TinyTemplate::new();
         tt.add_template("Project.toml", TEMPLATE)
@@ -88,8 +88,6 @@ impl Command for Init {
 
         std::fs::write(smaugignore_path, smaugignore).expect("Couldn't write .smaugignore.");
 
-        Ok(Box::new(InitResult {
-            path: path.to_path_buf(),
-        }))
+        Ok(Box::new(InitResult { path }))
     }
 }

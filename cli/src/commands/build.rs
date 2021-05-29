@@ -30,6 +30,8 @@ pub enum Error {
     ConfigError { path: PathBuf },
     #[display(fmt = "Could not find file at {}", "path.display()")]
     FileNotFound { path: PathBuf },
+    #[display(fmt = "Building {} failed", "project_name")]
+    BuildError { project_name: String },
 }
 
 impl Command for Build {
@@ -105,7 +107,7 @@ impl Command for Build {
                     process::Stdio::inherit()
                 };
 
-                process::Command::new(bin)
+                let result = process::Command::new(bin)
                     .current_dir(bin_dir.to_str().unwrap())
                     .arg("--only-package")
                     .args(dragonruby_options)
@@ -138,9 +140,15 @@ impl Command for Build {
                         .expect("couldn't copy exceptions");
                 }
 
-                Ok(Box::new(BuildResult {
-                    project_name: config.project.unwrap().name,
-                }))
+                if result.success() {
+                    Ok(Box::new(BuildResult {
+                        project_name: config.project.unwrap().name,
+                    }))
+                } else {
+                    Err(Box::new(Error::BuildError {
+                        project_name: config.project.unwrap().name,
+                    }))
+                }
             }
         }
     }

@@ -28,6 +28,11 @@ pub enum Error {
     ConfiguredDragonRubyNotFound,
     #[display(fmt = "Couldn't load Smaug configuration.")]
     ConfigError { path: PathBuf },
+    #[display(
+        fmt = "{} crashed look at the logs for more information",
+        "project_name"
+    )]
+    RunError { project_name: String },
 }
 
 impl Command for Run {
@@ -102,7 +107,7 @@ impl Command for Run {
                     process::Stdio::inherit()
                 };
 
-                process::Command::new(bin)
+                let status = process::Command::new(bin)
                     .arg(path.clone())
                     .args(dragonruby_options)
                     .stdout(stdout)
@@ -128,9 +133,15 @@ impl Command for Run {
                         .expect("couldn't copy exceptions");
                 }
 
-                Ok(Box::new(RunResult {
-                    project_name: config.project.unwrap().name,
-                }))
+                if status.success() {
+                    Ok(Box::new(RunResult {
+                        project_name: config.project.unwrap().name,
+                    }))
+                } else {
+                    Err(Box::new(Error::RunError {
+                        project_name: config.project.unwrap().name,
+                    }))
+                }
             }
         }
     }
