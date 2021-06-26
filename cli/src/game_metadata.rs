@@ -20,13 +20,20 @@ pub fn from_config(config: &Config) -> GameMetadata {
         .clone()
         .expect("Smaug.toml is not a project configuration");
     GameMetadata {
-        devid: "dragonrider".to_string(),
+        devid: devid(&config),
         devtitle: project.authors.join(" "),
         gameid: project.name,
         gametitle: project.title,
         version: project.version,
         icon: project.icon,
         compile_ruby: project.compile_ruby,
+    }
+}
+
+fn devid(config: &Config) -> String {
+    match config.itch.as_ref() {
+        Some(itch) => itch.username.clone(),
+        None => "dragonrider".to_string(),
     }
 }
 
