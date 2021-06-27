@@ -1354,7 +1354,7 @@ checksum = "c111b5bd5695e56cffe5129854aa230b39c93a305372fdbb2668ca2394eea9f8"
 
 [[package]]
 name = "smaug"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "blake2",
  "derive_more",
@@ -1379,7 +1379,7 @@ dependencies = [
 
 [[package]]
 name = "smaug-cli"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "clap",
  "derive_more",
