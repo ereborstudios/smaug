@@ -250,8 +250,11 @@ fn parse_dragonruby_dir(path: &Path) -> DragonRubyResult {
     debug!("DragonRuby bin {}", dragonruby_bin.display());
     let dragonruby_bind_bin = base_path.join(dragonruby_bind_name());
     debug!("DragonRuby Bind bin {}", dragonruby_bind_bin.display());
-    let changelog = base_path.join("CHANGELOG.txt");
+    let mut changelog = base_path.join("CHANGELOG.txt");
     debug!("Changelog {}", changelog.display());
+    if !changelog.exists() {
+        changelog = base_path.join("CHANGELOG-CURR.txt");
+    }
 
     if !dragonruby_bin.exists() || !changelog.exists() {
         return Err(DragonRubyError::DragonRubyNotFound { path: base_path });

@@ -1,6 +1,11 @@
+# Unreleased
+
+* Add support for DragonRuby versions > 3
+
 # Version 0.3.2
 
 * Fix setting devid when calling `publish`
+
 # Version 0.3.1
 
 * Add `config` command to show your current Smaug configuration
