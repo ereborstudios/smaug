@@ -73,7 +73,8 @@ impl Command for Publish {
                 let bin_dir = dragonruby.install_dir();
                 let build_dir = bin_dir.join(path.file_name().unwrap());
 
-                copy_directory(&path, &build_dir).expect("Could not copy to build directory.");
+                copy_directory(&path, build_dir.clone())
+                    .expect("Could not copy to build directory.");
 
                 let log_dir = build_dir.join("logs");
                 let exception_dir = build_dir.join("exceptions");
@@ -108,13 +109,13 @@ impl Command for Publish {
                     .wait()
                     .unwrap();
 
-                copy_directory(&bin_dir.join("builds"), &path.join("builds"))
+                copy_directory(&bin_dir.join("builds"), path.join("builds"))
                     .expect("Could not copy builds.");
 
-                let local_log_dir = &path.join("logs");
+                let local_log_dir = path.join("logs");
                 rm_rf::ensure_removed(&local_log_dir).expect("Couldn't remove local logs");
 
-                let local_exception_dir = &path.join("exceptions");
+                let local_exception_dir = path.join("exceptions");
                 rm_rf::ensure_removed(&local_exception_dir)
                     .expect("Couldn't remove local exceptions");
 

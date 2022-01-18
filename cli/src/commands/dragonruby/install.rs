@@ -56,7 +56,7 @@ fn install(dr: &DragonRuby) -> io::Result<DragonRuby> {
         destination.display()
     );
 
-    copy_directory(&source, &destination)?;
+    copy_directory(&source, destination.clone())?;
 
     let dr = dragonruby::new(&destination).expect("Could not find DragonRuby");
 

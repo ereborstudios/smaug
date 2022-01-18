@@ -116,10 +116,10 @@ impl Command for Run {
                     .wait()
                     .unwrap();
 
-                let local_log_dir = &path.join("logs");
+                let local_log_dir = path.join("logs");
                 rm_rf::ensure_removed(&local_log_dir).expect("Couldn't remove local logs");
 
-                let local_exception_dir = &path.join("exceptions");
+                let local_exception_dir = path.join("exceptions");
                 rm_rf::ensure_removed(&local_exception_dir)
                     .expect("Couldn't remove local exceptions");
 

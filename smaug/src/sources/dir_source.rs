@@ -20,7 +20,7 @@ impl Source for DirSource {
             destination.display()
         );
 
-        crate::util::dir::copy_directory(&source, &destination)?;
+        crate::util::dir::copy_directory(&source, destination)?;
 
         Ok(())
     }

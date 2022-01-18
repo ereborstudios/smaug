@@ -5,7 +5,7 @@ use std::io;
 use std::path::Path;
 use walkdir::WalkDir;
 
-pub fn copy_directory<P: AsRef<Path>>(source: &P, destination: &P) -> io::Result<()> {
+pub fn copy_directory<P: AsRef<Path>>(source: &P, destination: P) -> io::Result<()> {
     let mut ignore_builder = GitignoreBuilder::new(source);
     let ignore_file = source.as_ref().join(".smaugignore");
 

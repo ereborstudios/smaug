@@ -78,9 +78,16 @@ impl Command for Build {
             Some(dragonruby) => {
                 let bin_dir = dragonruby.install_dir();
                 let build_dir = bin_dir.join(path.file_name().unwrap());
+                let builds_directory = &bin_dir.join("builds");
 
-                copy_directory(&path, &build_dir).expect("Could not copy to build directory.");
                 debug!("Build Directory: {:?}", build_dir);
+                trace!("Cleaning build directory");
+                rm_rf::ensure_removed(&build_dir).expect("couldn't clean build directory");
+                trace!("Cleaning builds directory");
+                rm_rf::ensure_removed(&builds_directory).expect("couldn't clean build directory");
+
+                copy_directory(&path, build_dir.clone())
+                    .expect("Could not copy to build directory.");
 
                 let log_dir = build_dir.join("logs");
                 let exception_dir = build_dir.join("exceptions");
@@ -118,15 +125,16 @@ impl Command for Build {
                     .wait()
                     .unwrap();
 
-                copy_directory(&bin_dir.join("builds"), &path.join("builds"))
+                let local_builds_dir = path.join("builds");
+                copy_directory(&builds_directory, &local_builds_dir)
                     .expect("Could not copy builds.");
 
                 rm_rf::ensure_removed(build_dir).expect("Could not clean up build dir");
 
-                let local_log_dir = &path.join("logs");
+                let local_log_dir = path.join("logs");
                 rm_rf::ensure_removed(&local_log_dir).expect("Couldn't remove local logs");
 
-                let local_exception_dir = &path.join("exceptions");
+                let local_exception_dir = path.join("exceptions");
                 rm_rf::ensure_removed(&local_exception_dir)
                     .expect("Couldn't remove local exceptions");
 
