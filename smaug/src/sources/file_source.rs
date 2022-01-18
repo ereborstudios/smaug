@@ -32,7 +32,7 @@ impl Source for FileSource {
                 std::io::ErrorKind::NotFound,
                 format!("No Smaug.toml file found in {}", cached.display()).as_str(),
             )),
-            Some(dir) => DirSource { path: dir }.install(dependency, &destination),
+            Some(dir) => DirSource { path: dir }.install(dependency, destination),
         }
     }
 }

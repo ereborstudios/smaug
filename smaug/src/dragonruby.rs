@@ -21,14 +21,16 @@ pub enum Edition {
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Display)]
 #[display(
-    fmt = "DragonRuby {} {}.{}",
+    fmt = "DragonRuby {} {}.{} ({})",
     "edition",
     "version.major",
-    "version.minor"
+    "version.minor",
+    "identifier"
 )]
 pub struct Version {
     pub edition: Edition,
     pub version: SemVer,
+    pub identifier: String,
 }
 
 #[derive(Debug, Clone, Display)]
@@ -54,9 +56,9 @@ pub fn new<P: AsRef<Path>>(path: &P) -> DragonRubyResult {
     let dragonruby_path = path.as_ref();
 
     if dragonruby_path.is_dir() {
-        parse_dragonruby_dir(&dragonruby_path)
+        parse_dragonruby_dir(dragonruby_path)
     } else if zip_extensions::is_zip(&dragonruby_path.to_path_buf()) {
-        parse_dragonruby_zip(&dragonruby_path)
+        parse_dragonruby_zip(dragonruby_path)
     } else {
         Err(DragonRubyError::DragonRubyNotFound {
             path: dragonruby_path.to_path_buf(),
@@ -260,8 +262,7 @@ fn parse_dragonruby_dir(path: &Path) -> DragonRubyResult {
         return Err(DragonRubyError::DragonRubyNotFound { path: base_path });
     };
 
-    let changelog_contents =
-        fs::read_to_string(changelog).expect("CHANGELOG could not be read.");
+    let changelog_contents = fs::read_to_string(changelog).expect("CHANGELOG could not be read.");
 
     let first_line = changelog_contents
         .lines()
@@ -285,8 +286,12 @@ fn parse_dragonruby_dir(path: &Path) -> DragonRubyResult {
     }
 
     let dragonruby = DragonRuby {
-        path: base_path,
-        version: Version { edition, version },
+        path: base_path.clone(),
+        version: Version {
+            edition,
+            version,
+            identifier: base_path.file_name().unwrap().to_string_lossy().to_string(),
+        },
     };
 
     Ok(dragonruby)

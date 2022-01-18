@@ -27,12 +27,12 @@ pub enum Error {
     )]
     ConfiguredDragonRubyNotFound,
     #[display(fmt = "Couldn't load Smaug configuration.")]
-    ConfigError { path: PathBuf },
+    Config { path: PathBuf },
     #[display(
         fmt = "{} crashed look at the logs for more information",
         "project_name"
     )]
-    RunError { project_name: String },
+    Run { project_name: String },
 }
 
 impl Command for Run {
@@ -58,7 +58,7 @@ impl Command for Run {
 
         let config = match smaug::config::load(&config_path) {
             Ok(config) => config,
-            Err(..) => return Err(Box::new(Error::ConfigError { path: config_path })),
+            Err(..) => return Err(Box::new(Error::Config { path: config_path })),
         };
         debug!("Smaug config: {:?}", config);
 
@@ -116,20 +116,20 @@ impl Command for Run {
                     .wait()
                     .unwrap();
 
-                let local_log_dir = &path.join("logs");
+                let local_log_dir = path.join("logs");
                 rm_rf::ensure_removed(&local_log_dir).expect("Couldn't remove local logs");
 
-                let local_exception_dir = &path.join("exceptions");
+                let local_exception_dir = path.join("exceptions");
                 rm_rf::ensure_removed(&local_exception_dir)
                     .expect("Couldn't remove local exceptions");
 
                 if log_dir.is_dir() {
-                    smaug::util::dir::copy_directory(&log_dir, &local_log_dir)
+                    smaug::util::dir::copy_directory(&log_dir, local_log_dir)
                         .expect("couldn't copy logs");
                 }
 
                 if exception_dir.is_dir() {
-                    smaug::util::dir::copy_directory(&exception_dir, &local_exception_dir)
+                    smaug::util::dir::copy_directory(&exception_dir, local_exception_dir)
                         .expect("couldn't copy exceptions");
                 }
 
@@ -138,7 +138,7 @@ impl Command for Run {
                         project_name: config.project.unwrap().name,
                     }))
                 } else {
-                    Err(Box::new(Error::RunError {
+                    Err(Box::new(Error::Run {
                         project_name: config.project.unwrap().name,
                     }))
                 }

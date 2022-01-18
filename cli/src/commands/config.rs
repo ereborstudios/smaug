@@ -13,7 +13,7 @@ use std::path::PathBuf;
 pub struct Config;
 
 #[derive(Debug, Serialize, Display)]
-#[display(fmt = "{}", "print_config(&config)")]
+#[display(fmt = "{}", "print_config(config)")]
 pub struct ConfigResult {
     config: toml::Value,
 }

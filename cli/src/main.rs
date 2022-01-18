@@ -18,7 +18,7 @@ use log::*;
 
 fn main() {
     let matches = clap_app!(smaug =>
-        (version: "0.3.2")
+        (version: "0.4.0")
         (author: "Matt Pruitt <matt@guitsaru.com>")
         (about: "Create games and share packages with the DragonRuby community")
         (setting: clap::AppSettings::SubcommandRequiredElseHelp)
@@ -137,7 +137,7 @@ fn main() {
         let subcommand_matches = matches.subcommand_matches(matches.subcommand_name().unwrap());
 
         let json = matches.is_present("json");
-        let result = cmd.run(&subcommand_matches.expect("No subcommand matches"));
+        let result = cmd.run(subcommand_matches.expect("No subcommand matches"));
 
         info!("");
         match result {

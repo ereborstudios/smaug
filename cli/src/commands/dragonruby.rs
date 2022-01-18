@@ -26,9 +26,9 @@ impl Command for DragonRuby {
             .unwrap();
 
         match matches.subcommand_name() {
-            Some("install") => Install.run(&subcommand_matches),
-            Some("list") => List.run(&subcommand_matches),
-            Some("uninstall") => Uninstall.run(&subcommand_matches),
+            Some("install") => Install.run(subcommand_matches),
+            Some("list") => List.run(subcommand_matches),
+            Some("uninstall") => Uninstall.run(subcommand_matches),
             _ => unreachable!(),
         }
     }

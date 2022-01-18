@@ -28,9 +28,9 @@ pub enum Error {
     )]
     ConfiguredDragonRubyNotFound,
     #[display(fmt = "Couldn't load Smaug configuration.")]
-    ConfigError { path: PathBuf },
+    Config { path: PathBuf },
     #[display(fmt = "Publishing {} failed", "project_name")]
-    PublishError { project_name: String },
+    Publish { project_name: String },
 }
 
 impl Command for Publish {
@@ -54,7 +54,7 @@ impl Command for Publish {
 
         let config = match smaug::config::load(&config_path) {
             Ok(config) => config,
-            Err(..) => return Err(Box::new(Error::ConfigError { path: config_path })),
+            Err(..) => return Err(Box::new(Error::Config { path: config_path })),
         };
 
         debug!("Smaug config: {:?}", config);
@@ -73,7 +73,8 @@ impl Command for Publish {
                 let bin_dir = dragonruby.install_dir();
                 let build_dir = bin_dir.join(path.file_name().unwrap());
 
-                copy_directory(&path, &build_dir).expect("Could not copy to build directory.");
+                copy_directory(&path, build_dir.clone())
+                    .expect("Could not copy to build directory.");
 
                 let log_dir = build_dir.join("logs");
                 let exception_dir = build_dir.join("exceptions");
@@ -108,23 +109,23 @@ impl Command for Publish {
                     .wait()
                     .unwrap();
 
-                copy_directory(&bin_dir.join("builds"), &path.join("builds"))
+                copy_directory(&bin_dir.join("builds"), path.join("builds"))
                     .expect("Could not copy builds.");
 
-                let local_log_dir = &path.join("logs");
+                let local_log_dir = path.join("logs");
                 rm_rf::ensure_removed(&local_log_dir).expect("Couldn't remove local logs");
 
-                let local_exception_dir = &path.join("exceptions");
+                let local_exception_dir = path.join("exceptions");
                 rm_rf::ensure_removed(&local_exception_dir)
                     .expect("Couldn't remove local exceptions");
 
                 if log_dir.is_dir() {
-                    smaug::util::dir::copy_directory(&log_dir, &local_log_dir)
+                    smaug::util::dir::copy_directory(&log_dir, local_log_dir)
                         .expect("couldn't copy logs");
                 }
 
                 if exception_dir.is_dir() {
-                    smaug::util::dir::copy_directory(&exception_dir, &local_exception_dir)
+                    smaug::util::dir::copy_directory(&exception_dir, local_exception_dir)
                         .expect("couldn't copy exceptions");
                 }
 
@@ -135,7 +136,7 @@ impl Command for Publish {
                         project_name: config.project.unwrap().name,
                     }))
                 } else {
-                    Err(Box::new(Error::PublishError {
+                    Err(Box::new(Error::Publish {
                         project_name: config.project.unwrap().name,
                     }))
                 }

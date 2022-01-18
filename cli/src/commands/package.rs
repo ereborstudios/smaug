@@ -14,7 +14,7 @@ impl Command for Package {
         let subcommand_matches = matches.subcommand_matches(matches.subcommand_name().unwrap());
 
         match matches.subcommand_name() {
-            Some("init") => init::Init.run(&subcommand_matches.unwrap()),
+            Some("init") => init::Init.run(subcommand_matches.unwrap()),
             _ => unreachable!(),
         }
     }

@@ -115,7 +115,7 @@ fn install_files(resolver: &Resolver) -> std::io::Result<()> {
         let source = install.from.as_path();
         let destination = install.to.as_path();
 
-        if can_install_file(&source, &destination) {
+        if can_install_file(source, destination) {
             trace!(
                 "Copying file from {} to {}",
                 source.display(),
