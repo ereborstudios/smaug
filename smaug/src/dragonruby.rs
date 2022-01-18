@@ -21,14 +21,16 @@ pub enum Edition {
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Display)]
 #[display(
-    fmt = "DragonRuby {} {}.{}",
+    fmt = "DragonRuby {} {}.{} ({})",
     "edition",
     "version.major",
-    "version.minor"
+    "version.minor",
+    "identifier"
 )]
 pub struct Version {
     pub edition: Edition,
     pub version: SemVer,
+    pub identifier: String,
 }
 
 #[derive(Debug, Clone, Display)]
@@ -284,8 +286,12 @@ fn parse_dragonruby_dir(path: &Path) -> DragonRubyResult {
     }
 
     let dragonruby = DragonRuby {
-        path: base_path,
-        version: Version { edition, version },
+        path: base_path.clone(),
+        version: Version {
+            edition,
+            version,
+            identifier: base_path.file_name().unwrap().to_string_lossy().to_string(),
+        },
     };
 
     Ok(dragonruby)
