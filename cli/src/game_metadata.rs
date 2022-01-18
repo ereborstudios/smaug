@@ -20,7 +20,7 @@ pub fn from_config(config: &Config) -> GameMetadata {
         .clone()
         .expect("Smaug.toml is not a project configuration");
     GameMetadata {
-        devid: devid(&config),
+        devid: devid(config),
         devtitle: project.authors.join(" "),
         gameid: project.name,
         gametitle: project.title,

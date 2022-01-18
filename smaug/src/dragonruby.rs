@@ -54,9 +54,9 @@ pub fn new<P: AsRef<Path>>(path: &P) -> DragonRubyResult {
     let dragonruby_path = path.as_ref();
 
     if dragonruby_path.is_dir() {
-        parse_dragonruby_dir(&dragonruby_path)
+        parse_dragonruby_dir(dragonruby_path)
     } else if zip_extensions::is_zip(&dragonruby_path.to_path_buf()) {
-        parse_dragonruby_zip(&dragonruby_path)
+        parse_dragonruby_zip(dragonruby_path)
     } else {
         Err(DragonRubyError::DragonRubyNotFound {
             path: dragonruby_path.to_path_buf(),
@@ -260,8 +260,7 @@ fn parse_dragonruby_dir(path: &Path) -> DragonRubyResult {
         return Err(DragonRubyError::DragonRubyNotFound { path: base_path });
     };
 
-    let changelog_contents =
-        fs::read_to_string(changelog).expect("CHANGELOG could not be read.");
+    let changelog_contents = fs::read_to_string(changelog).expect("CHANGELOG could not be read.");
 
     let first_line = changelog_contents
         .lines()

@@ -21,9 +21,9 @@ pub enum Error {
     #[display(fmt = "{} has already been added to this project.", "name")]
     AlreadyAdded { name: String },
     #[display(fmt = "Could not fetch from registry.")]
-    RegistryError,
+    Registry,
     #[display(fmt = "Could not install packages.")]
-    InstallError,
+    Install,
 }
 
 #[derive(Debug, Display, Serialize)]
@@ -68,7 +68,7 @@ impl Command for Add {
         let package_name = matches.value_of("PACKAGE").expect("No package given");
         let latest_version = match fetch_from_registry(package_name.to_string()) {
             Ok(version) => version,
-            Err(..) => return Err(Box::new(Error::RegistryError)),
+            Err(..) => return Err(Box::new(Error::Registry)),
         };
 
         trace!("Latest version: {}", latest_version);
@@ -93,7 +93,7 @@ impl Command for Add {
             .expect("Couldn't write config file.");
 
         if Install.run(matches).is_err() {
-            return Err(Box::new(Error::InstallError));
+            return Err(Box::new(Error::Install));
         }
 
         Ok(Box::new(AddResult {

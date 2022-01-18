@@ -137,7 +137,7 @@ fn main() {
         let subcommand_matches = matches.subcommand_matches(matches.subcommand_name().unwrap());
 
         let json = matches.is_present("json");
-        let result = cmd.run(&subcommand_matches.expect("No subcommand matches"));
+        let result = cmd.run(subcommand_matches.expect("No subcommand matches"));
 
         info!("");
         match result {

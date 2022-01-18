@@ -24,7 +24,7 @@ pub enum Error {
     #[display(fmt = "The bind command is only available for DragonRuby pro.")]
     DragonRubyNotPro,
     #[display(fmt = "Couldn't load Smaug configuration.")]
-    ConfigError { path: PathBuf },
+    Config { path: PathBuf },
     #[display(fmt = "Could not find file at {}", "path.display()")]
     FileNotFound { path: PathBuf },
 }
@@ -59,7 +59,7 @@ impl Command for Bind {
 
         let config = match smaug::config::load(&config_path) {
             Ok(config) => config,
-            Err(..) => return Err(Box::new(Error::ConfigError { path: config_path })),
+            Err(..) => return Err(Box::new(Error::Config { path: config_path })),
         };
 
         debug!("Smaug config: {:?}", config);

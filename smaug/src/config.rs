@@ -218,29 +218,25 @@ impl<'de> Deserialize<'de> for DependencyOptions {
                     }
                 }
 
-                if repo.is_some() {
+                if let Some(repo) = repo {
                     Ok(DependencyOptions::Git {
-                        repo: repo.expect("No repo"),
+                        repo,
                         branch,
                         tag,
                         rev,
                     })
-                } else if dir.is_some() {
+                } else if let Some(dir) = dir {
                     Ok(DependencyOptions::Dir {
-                        dir: Path::new(&dir.expect("No dir")).to_path_buf(),
+                        dir: Path::new(&dir).to_path_buf(),
                     })
-                } else if file.is_some() {
+                } else if let Some(file) = file {
                     Ok(DependencyOptions::File {
-                        file: Path::new(&file.expect("No file")).to_path_buf(),
+                        file: Path::new(&file).to_path_buf(),
                     })
-                } else if version.is_some() {
-                    Ok(DependencyOptions::Registry {
-                        version: version.expect("No version"),
-                    })
-                } else if url.is_some() {
-                    Ok(DependencyOptions::Url {
-                        url: url.expect("No URL"),
-                    })
+                } else if let Some(version) = version {
+                    Ok(DependencyOptions::Registry { version })
+                } else if let Some(url) = url {
+                    Ok(DependencyOptions::Url { url })
                 } else {
                     Err(de::Error::invalid_value(
                         de::Unexpected::Map,

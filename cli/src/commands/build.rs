@@ -27,11 +27,11 @@ pub enum Error {
     )]
     ConfiguredDragonRubyNotFound,
     #[display(fmt = "Couldn't load Smaug configuration.")]
-    ConfigError { path: PathBuf },
+    Config { path: PathBuf },
     #[display(fmt = "Could not find file at {}", "path.display()")]
     FileNotFound { path: PathBuf },
     #[display(fmt = "Building {} failed", "project_name")]
-    BuildError { project_name: String },
+    Build { project_name: String },
 }
 
 impl Command for Build {
@@ -61,7 +61,7 @@ impl Command for Build {
 
         let config = match smaug::config::load(&config_path) {
             Ok(conf) => conf,
-            Err(..) => return Err(Box::new(Error::ConfigError { path: config_path })),
+            Err(..) => return Err(Box::new(Error::Config { path: config_path })),
         };
         debug!("Smaug config: {:?}", config);
 
@@ -131,12 +131,12 @@ impl Command for Build {
                     .expect("Couldn't remove local exceptions");
 
                 if log_dir.is_dir() {
-                    smaug::util::dir::copy_directory(&log_dir, &local_log_dir)
+                    smaug::util::dir::copy_directory(&log_dir, local_log_dir)
                         .expect("couldn't copy logs");
                 }
 
                 if exception_dir.is_dir() {
-                    smaug::util::dir::copy_directory(&exception_dir, &local_exception_dir)
+                    smaug::util::dir::copy_directory(&exception_dir, local_exception_dir)
                         .expect("couldn't copy exceptions");
                 }
 
@@ -145,7 +145,7 @@ impl Command for Build {
                         project_name: config.project.unwrap().name,
                     }))
                 } else {
-                    Err(Box::new(Error::BuildError {
+                    Err(Box::new(Error::Build {
                         project_name: config.project.unwrap().name,
                     }))
                 }
