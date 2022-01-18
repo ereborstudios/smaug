@@ -1,6 +1,7 @@
-# Unreleased
+# Version 0.4.0
 
 * Add support for DragonRuby versions > 3
+* Display identifier in `smaug dragonruby list` for easier uninstall
 
 # Version 0.3.2
 

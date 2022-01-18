@@ -35,7 +35,7 @@ scoop install smaug
 # Usage
 
 ```
-smaug 0.3.2
+smaug 0.4.0
 Matt Pruitt <matt@guitsaru.com>
 Create games and share packages with the DragonRuby community
 
