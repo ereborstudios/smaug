@@ -13,7 +13,7 @@ jobs:
 
       - name: Publish AUR package
         # TODO: Change back to KSXGithub/github-actions-delpoy-aur
-        uses: superfly/aur-releaser#main
+        uses: superfly/aur-releaser@main
         with:
           pkgname: smaug
           pkgbuild: ./PKGBUILD
