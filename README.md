@@ -32,6 +32,14 @@ scoop bucket add ereborstudios https://github.com/ereborstudios/scoop-bucket.git
 scoop install smaug
 ```
 
+## Other Operating Systems
+
+We do not maintain packages for any other operating systems. You can use Cargo
+as a package manager.
+
+1. Install rust through your package manager or with [rustup](https://rustup.rs/)
+2. Run `cargo install smaug-bin`
+
 # Usage
 
 ```
