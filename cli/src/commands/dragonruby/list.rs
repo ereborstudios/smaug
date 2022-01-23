@@ -3,7 +3,7 @@ use crate::command::CommandResult;
 use clap::ArgMatches;
 use derive_more::Display;
 use serde::Serialize;
-use smaug::dragonruby::Version;
+use smaug_lib::dragonruby::Version;
 
 #[derive(Debug)]
 pub struct List;
@@ -16,7 +16,7 @@ pub struct ListResult {
 
 impl Command for List {
     fn run(&self, _matches: &ArgMatches) -> CommandResult {
-        match smaug::dragonruby::list_installed() {
+        match smaug_lib::dragonruby::list_installed() {
             Ok(versions) => Ok(Box::new(ListResult {
                 versions: versions.iter().map(|dr| dr.clone().version).collect(),
             })),

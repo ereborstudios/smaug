@@ -37,7 +37,7 @@ impl Command for Init {
     fn run(&self, matches: &ArgMatches) -> CommandResult {
         trace!("Init Command");
 
-        let latest = smaug::dragonruby::latest();
+        let latest = smaug_lib::dragonruby::latest();
         if let Err(..) = latest {
             return Err(Box::new(Error::DragonRubyNotFound {}));
         }
@@ -58,8 +58,8 @@ impl Command for Init {
 
         let version = latest.version;
         let edition = match version.edition {
-            smaug::dragonruby::Edition::Standard => "standard",
-            smaug::dragonruby::Edition::Pro => "pro",
+            smaug_lib::dragonruby::Edition::Standard => "standard",
+            smaug_lib::dragonruby::Edition::Pro => "pro",
         };
 
         let context = PackageConfig {

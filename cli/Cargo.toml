@@ -1,5 +1,5 @@
 [package]
-name = "smaug"
+name = "smaug-bin"
 version = "0.4.0"
 authors = ["Matt Pruitt <matt@guitsaru.com>"]
 edition = "2018"

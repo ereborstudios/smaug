@@ -1,12 +1,12 @@
 use crate::command::Command;
 use crate::command::CommandResult;
-use ::smaug::dragonruby;
+use ::smaug_lib::dragonruby;
 use clap::ArgMatches;
 use derive_more::Display;
 use derive_more::Error;
 use log::*;
 use serde::Serialize;
-use smaug::smaug;
+use smaug_lib::smaug;
 
 #[derive(Debug)]
 pub struct Uninstall;

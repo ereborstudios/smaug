@@ -5,7 +5,7 @@ use derive_more::Display;
 use derive_more::Error;
 use log::*;
 use serde::Serialize;
-use smaug::dragonruby;
+use smaug_lib::dragonruby;
 use std::env;
 use std::path::Path;
 
@@ -37,7 +37,7 @@ impl Command for Docs {
 
         let config_path = path.join("Smaug.toml");
 
-        let dragonruby = match smaug::config::load(&config_path) {
+        let dragonruby = match smaug_lib::config::load(&config_path) {
             Ok(config) => dragonruby::configured_version(&config),
             Err(..) => dragonruby::latest().ok(),
         };

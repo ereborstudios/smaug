@@ -5,7 +5,7 @@ use derive_more::Display;
 use derive_more::Error;
 use log::*;
 use serde::Serialize;
-use smaug::dragonruby;
+use smaug_lib::dragonruby;
 use std::env;
 use std::path::Path;
 use std::path::PathBuf;
@@ -57,7 +57,7 @@ impl Command for Bind {
 
         let config_path = path.join("Smaug.toml");
 
-        let config = match smaug::config::load(&config_path) {
+        let config = match smaug_lib::config::load(&config_path) {
             Ok(config) => config,
             Err(..) => return Err(Box::new(Error::Config { path: config_path })),
         };

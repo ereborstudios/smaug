@@ -7,7 +7,7 @@ use log::*;
 use question::{Answer, Question};
 use resolver::Resolver;
 use serde::Serialize;
-use smaug::{dependency::Dependency, resolver};
+use smaug_lib::{dependency::Dependency, resolver};
 use std::env;
 use std::path::Path;
 use std::path::PathBuf;
@@ -54,7 +54,7 @@ impl Command for Install {
 
         let config_path = path.join("Smaug.toml");
 
-        let config = match smaug::config::load(&config_path) {
+        let config = match smaug_lib::config::load(&config_path) {
             Ok(config) => config,
             Err(..) => return Err(Box::new(Error::Config { path: config_path })),
         };
@@ -134,8 +134,8 @@ fn can_install_file(source: &Path, destination: &Path) -> bool {
         return true;
     }
 
-    let source_digest = smaug::util::digest::file(source).unwrap();
-    let destination_digest = smaug::util::digest::file(destination).unwrap();
+    let source_digest = smaug_lib::util::digest::file(source).unwrap();
+    let destination_digest = smaug_lib::util::digest::file(destination).unwrap();
     debug!(
         "Source: {}, Destination: {}",
         source_digest, destination_digest

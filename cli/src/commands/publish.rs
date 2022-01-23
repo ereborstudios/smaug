@@ -5,8 +5,8 @@ use derive_more::Display;
 use derive_more::Error;
 use log::*;
 use serde::Serialize;
-use smaug::dragonruby;
-use smaug::util::dir::copy_directory;
+use smaug_lib::dragonruby;
+use smaug_lib::util::dir::copy_directory;
 use std::env;
 use std::path::Path;
 use std::path::PathBuf;
@@ -52,7 +52,7 @@ impl Command for Publish {
 
         let config_path = path.join("Smaug.toml");
 
-        let config = match smaug::config::load(&config_path) {
+        let config = match smaug_lib::config::load(&config_path) {
             Ok(config) => config,
             Err(..) => return Err(Box::new(Error::Config { path: config_path })),
         };
@@ -120,12 +120,12 @@ impl Command for Publish {
                     .expect("Couldn't remove local exceptions");
 
                 if log_dir.is_dir() {
-                    smaug::util::dir::copy_directory(&log_dir, local_log_dir)
+                    smaug_lib::util::dir::copy_directory(&log_dir, local_log_dir)
                         .expect("couldn't copy logs");
                 }
 
                 if exception_dir.is_dir() {
-                    smaug::util::dir::copy_directory(&exception_dir, local_exception_dir)
+                    smaug_lib::util::dir::copy_directory(&exception_dir, local_exception_dir)
                         .expect("couldn't copy exceptions");
                 }
 

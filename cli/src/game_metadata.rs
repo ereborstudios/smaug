@@ -1,5 +1,5 @@
 use serde::Serialize;
-use smaug::config::Config;
+use smaug_lib::config::Config;
 use std::path::Path;
 use tinytemplate::TinyTemplate;
 
