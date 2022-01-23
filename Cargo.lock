@@ -1358,6 +1358,28 @@ checksum = "c111b5bd5695e56cffe5129854aa230b39c93a305372fdbb2668ca2394eea9f8"
 name = "smaug"
 version = "0.4.0"
 dependencies = [
+ "clap",
+ "derive_more",
+ "log",
+ "open",
+ "question",
+ "reqwest",
+ "rm_rf",
+ "serde",
+ "serde_json",
+ "smaug-lib",
+ "stderrlog",
+ "tinytemplate",
+ "toml",
+ "toml_edit",
+ "zip",
+ "zip-extensions",
+]
+
+[[package]]
+name = "smaug-lib"
+version = "0.4.0"
+dependencies = [
  "blake2",
  "derive_more",
  "directories",
@@ -1375,28 +1397,6 @@ dependencies = [
  "toml",
  "url",
  "walkdir",
- "zip",
- "zip-extensions",
-]
-
-[[package]]
-name = "smaug-cli"
-version = "0.4.0"
-dependencies = [
- "clap",
- "derive_more",
- "log",
- "open",
- "question",
- "reqwest",
- "rm_rf",
- "serde",
- "serde_json",
- "smaug",
- "stderrlog",
- "tinytemplate",
- "toml",
- "toml_edit",
  "zip",
  "zip-extensions",
 ]

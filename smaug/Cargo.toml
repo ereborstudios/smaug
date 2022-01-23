@@ -1,8 +1,14 @@
 [package]
-name = "smaug"
+name = "smaug-lib"
 version = "0.4.0"
 authors = ["Matt Pruitt <matt@guitsaru.com>"]
 edition = "2018"
+license = "AGPL-3.0-or-later"
+license_file = "../LICENSE"
+description = "The library for interacting with Smaug projects"
+homepage = "https://smaug.dev"
+repository = "https://github.com/ereborstudios/smaug"
+readme = "../README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
