@@ -59,6 +59,7 @@ impl Command for Init {
         let version = latest.version;
         let edition = match version.edition {
             smaug_lib::dragonruby::Edition::Standard => "standard",
+            smaug_lib::dragonruby::Edition::Indie => "indie",
             smaug_lib::dragonruby::Edition::Pro => "pro",
         };
 
