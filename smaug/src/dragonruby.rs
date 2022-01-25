@@ -15,6 +15,8 @@ use std::path::PathBuf;
 pub enum Edition {
     #[display(fmt = "")]
     Standard,
+    #[display(fmt = "Indie")]
+    Indie,
     #[display(fmt = "Pro")]
     Pro,
 }
@@ -74,6 +76,10 @@ impl DragonRuby {
                 "pro-{}.{}",
                 self.version.version.major, self.version.version.minor
             )),
+            Edition::Indie => location.join(format!(
+                "indie-{}.{}",
+                self.version.version.major, self.version.version.minor
+            )),
             Edition::Standard => location.join(format!(
                 "{}.{}",
                 self.version.version.major, self.version.version.minor
@@ -105,6 +111,8 @@ pub fn configured_version(config: &Config) -> Option<DragonRuby> {
         .expect("Not a valid DragonRuby version.");
     let edition = if config.dragonruby.edition == "pro" {
         Edition::Pro
+    } else if config.dragonruby.edition == "indie" {
+        Edition::Indie
     } else {
         Edition::Standard
     };
@@ -252,6 +260,8 @@ fn parse_dragonruby_dir(path: &Path) -> DragonRubyResult {
     debug!("DragonRuby bin {}", dragonruby_bin.display());
     let dragonruby_bind_bin = base_path.join(dragonruby_bind_name());
     debug!("DragonRuby Bind bin {}", dragonruby_bind_bin.display());
+    let dragonruby_android_stub = base_path.join(".dragonruby/stubs/android");
+    debug!("DragonRuby iOS app bin {}", dragonruby_bind_bin.display());
     let mut changelog = base_path.join("CHANGELOG.txt");
     if !changelog.exists() {
         changelog = base_path.join("CHANGELOG-CURR.txt");
@@ -279,8 +289,10 @@ fn parse_dragonruby_dir(path: &Path) -> DragonRubyResult {
         SemVer::parse(format!("{}.0", latest.as_str()).as_str()).expect("not a valid version");
     debug!("Version: {}", version);
 
-    if dragonruby_bind_bin.exists() {
+    if dragonruby_android_stub.exists() {
         edition = Edition::Pro;
+    } else if dragonruby_bind_bin.exists() {
+        edition = Edition::Indie;
     } else {
         edition = Edition::Standard;
     }
