@@ -10,14 +10,17 @@ use std::env;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process;
+use std::fs::{File, create_dir};
+use std::io::prelude::*;
 
 #[derive(Debug)]
 pub struct Run;
 
 #[derive(Debug, Serialize, Display)]
-#[display(fmt = "Ran project {}", "project_name")]
+#[display(fmt = "Ran project {} as process {}", "project_name", "pid")]
 pub struct RunResult {
     project_name: String,
+    pid: u32,
 }
 
 #[derive(Debug, Display, Error, Serialize)]
@@ -107,16 +110,24 @@ impl Command for Run {
                     process::Stdio::inherit()
                 };
 
-                let status = process::Command::new(bin)
+                let mut child = process::Command::new(bin)
                     .arg(path.clone())
                     .args(dragonruby_options)
                     .stdout(stdout)
                     .spawn()
-                    .unwrap()
-                    .wait()
                     .unwrap();
 
                 let local_log_dir = path.join("logs");
+                if !local_log_dir.is_dir() {
+                    create_dir(&local_log_dir)
+                        .expect("couldn't create local logs");
+                }
+
+                let mut file = File::create(&local_log_dir.join("pid.lock")).unwrap();
+                file.write_fmt(format_args!("{}", child.id())).unwrap();
+
+                let status = child.wait().unwrap();
+
                 rm_rf::ensure_removed(&local_log_dir).expect("Couldn't remove local logs");
 
                 let local_exception_dir = path.join("exceptions");
@@ -136,6 +147,7 @@ impl Command for Run {
                 if status.success() {
                     Ok(Box::new(RunResult {
                         project_name: config.project.unwrap().name,
+                        pid: child.id(),
                     }))
                 } else {
                     Err(Box::new(Error::Run {
