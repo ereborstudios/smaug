@@ -1,3 +1,7 @@
+# Version 0.5.1
+
+* Allow ctrl-c while using `smaug run`
+* Save the `smaug run` pid to a file to allow external processes to quit them
 # Version 0.5.0
 
 * Add support for DragonRuby Indie
