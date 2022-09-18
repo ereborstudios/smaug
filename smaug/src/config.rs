@@ -13,6 +13,7 @@ use serde::Serialize;
 use std::fmt;
 use std::path::Path;
 use std::path::PathBuf;
+use dunce;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Config {
@@ -104,7 +105,7 @@ pub enum Error {
 }
 
 pub fn load<P: AsRef<Path>>(path: &P) -> Result<Config, Error> {
-    let canonical = std::fs::canonicalize(path.as_ref());
+    let canonical = dunce::canonicalize(path.as_ref());
     if canonical.is_err() {
         return Err(Error::FileNotFound {
             path: path.as_ref().to_path_buf(),
@@ -173,7 +174,7 @@ impl<'de> Deserialize<'de> for DependencyOptions {
                     })
                 } else if path.is_dir() {
                     let canonical =
-                        std::fs::canonicalize(path.clone()).expect("Could not find path.");
+                        dunce::canonicalize(path.clone()).expect("Could not find path.");
                     Ok(DependencyOptions::Dir { dir: canonical })
                 } else if path.is_file() {
                     Ok(DependencyOptions::File {

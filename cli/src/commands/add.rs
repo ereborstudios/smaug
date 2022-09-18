@@ -11,6 +11,7 @@ use std::env;
 use std::path::Path;
 use std::path::PathBuf;
 use toml_edit::{value, Document};
+use dunce;
 
 pub struct Add;
 
@@ -44,7 +45,7 @@ impl Command for Add {
 
         debug!("Directory: {}", directory);
 
-        let canonical = match std::fs::canonicalize(directory) {
+        let canonical = match dunce::canonicalize(directory) {
             Ok(dir) => dir,
             Err(..) => {
                 return Err(Box::new(Error::FileNotFound {
@@ -54,7 +55,7 @@ impl Command for Add {
         };
 
         let path = Path::new(&canonical);
-        let path = std::fs::canonicalize(&path).expect("Could not find path");
+        let path = dunce::canonicalize(&path).expect("Could not find path");
 
         let config_path = path.join("Smaug.toml");
 

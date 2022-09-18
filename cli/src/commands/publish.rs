@@ -11,6 +11,7 @@ use std::env;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process;
+use dunce;
 
 #[derive(Debug)]
 pub struct Publish;
@@ -48,7 +49,7 @@ impl Command for Publish {
             .unwrap_or_else(|| current_directory.to_str().unwrap());
         debug!("Directory: {}", directory);
         let path = Path::new(directory);
-        let path = std::fs::canonicalize(&path).expect("Could not find path");
+        let path = dunce::canonicalize(&path).expect("Could not find path");
 
         let config_path = path.join("Smaug.toml");
 

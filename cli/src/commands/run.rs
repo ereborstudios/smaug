@@ -12,6 +12,7 @@ use std::path::PathBuf;
 use std::process;
 use std::fs::{File, create_dir};
 use std::io::prelude::*;
+use dunce;
 
 #[derive(Debug)]
 pub struct Run;
@@ -55,7 +56,8 @@ impl Command for Run {
             .unwrap_or_else(|| current_directory.to_str().unwrap());
         debug!("Directory: {}", directory);
         let path = Path::new(directory);
-        let path = std::fs::canonicalize(&path).expect("Could not find path");
+        let path = dunce::canonicalize(&path).expect("Could not find path");
+        debug!("path: {:?}", path);
 
         let config_path = path.join("Smaug.toml");
 
@@ -68,7 +70,7 @@ impl Command for Run {
         let metadata_file = path.join("metadata").join("game_metadata.txt");
         debug!("{:?}", metadata_file);
         let metadata_file =
-            std::fs::canonicalize(&metadata_file).expect("Could not create canonical path");
+            dunce::canonicalize(&metadata_file).expect("Could not create canonical path");
         trace!("Writing game metadata to {}.", metadata_file.display());
         let metadata = game_metadata::from_config(&config);
         metadata

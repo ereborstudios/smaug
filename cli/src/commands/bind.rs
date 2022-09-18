@@ -10,6 +10,7 @@ use std::env;
 use std::path::Path;
 use std::path::PathBuf;
 use std::process;
+use dunce;
 
 #[derive(Debug, Display, Serialize)]
 #[display(fmt = "Succesfully created bindings.")]
@@ -46,7 +47,7 @@ impl Command for Bind {
             .value_of("path")
             .unwrap_or_else(|| current_directory.to_str().unwrap());
         debug!("Directory: {}", directory);
-        let path = match std::fs::canonicalize(directory) {
+        let path = match dunce::canonicalize(directory) {
             Ok(dir) => dir,
             Err(..) => {
                 return Err(Box::new(Error::FileNotFound {
