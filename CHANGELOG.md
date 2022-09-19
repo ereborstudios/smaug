@@ -1,3 +1,7 @@
+# Version 0.5.2
+
+* Fix canonical directory locations for Windows
+
 # Version 0.5.1
 
 * Allow ctrl-c while using `smaug run`

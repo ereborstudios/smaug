@@ -18,7 +18,7 @@ use log::*;
 
 fn main() {
     let matches = clap_app!(smaug =>
-        (version: "0.5.1")
+        (version: "0.5.2")
         (author: "Matt Pruitt <matt@guitsaru.com>")
         (about: "Create games and share packages with the DragonRuby community")
         (setting: clap::AppSettings::SubcommandRequiredElseHelp)
