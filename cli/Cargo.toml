@@ -21,6 +21,7 @@ smaug-lib = { path = "../smaug", version = "0.5.1" }
 
 clap = "3.0.0-beta.2"
 derive_more = "0.99.11"
+dunce = "*"
 log = "0.4"
 open = "1.7.0"
 question = "0.2.2"

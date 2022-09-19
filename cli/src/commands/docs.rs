@@ -8,6 +8,7 @@ use serde::Serialize;
 use smaug_lib::dragonruby;
 use std::env;
 use std::path::Path;
+use dunce;
 
 #[derive(Debug, Serialize, Display)]
 #[display(fmt = "Opened docs in your web browser.")]
@@ -33,7 +34,7 @@ impl Command for Docs {
             .unwrap_or_else(|| current_directory.to_str().unwrap());
         debug!("Directory: {}", directory);
         let path = Path::new(directory);
-        let path = std::fs::canonicalize(&path).expect("Could not find path");
+        let path = dunce::canonicalize(&path).expect("Could not find path");
 
         let config_path = path.join("Smaug.toml");
 
