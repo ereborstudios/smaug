@@ -12,7 +12,7 @@ pub struct DirSource {
 impl Source for DirSource {
     fn install(&self, dependency: &Dependency, destination: &Path) -> std::io::Result<()> {
         let project_dir = destination.parent().unwrap();
-        let source = project_dir.join(self.path.to_path_buf());
+        let source = project_dir.join(&self.path);
         let destination = destination.join(dependency.clone().name);
         trace!(
             "Installing directory from {} to {}",

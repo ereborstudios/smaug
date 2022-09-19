@@ -5,7 +5,6 @@ use derive_more::Display;
 use derive_more::Error;
 use log::*;
 use serde::Serialize;
-use std::path::Path;
 use std::path::PathBuf;
 
 #[derive(Debug)]
@@ -39,10 +38,10 @@ impl Command for New {
 
         let directory: &str = matches.value_of("PATH").unwrap();
         debug!("Directory: {}", directory);
-        let path = Path::new(directory);
+        let path = PathBuf::from(directory);
 
         let source = latest.install_dir().join("mygame");
-        smaug_lib::util::dir::copy_directory(&source, path.to_path_buf())
+        smaug_lib::util::dir::copy_directory(&source, path.clone())
             .expect("Installed DragonRuby doesn't have mygame directory.");
 
         let gitignore = include_str!("../../templates/gitignore.template");
@@ -59,8 +58,6 @@ impl Command for New {
             return Err(Box::new(Error::InitFailed));
         }
 
-        Ok(Box::new(NewResult {
-            path: path.to_path_buf(),
-        }))
+        Ok(Box::new(NewResult { path }))
     }
 }
