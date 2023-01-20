@@ -19,7 +19,7 @@ blake2 = "0.9"
 derive_more = "0.99.11"
 directories = "3.0.1"
 dunce = "*"
-git2 = "0.13"
+git2 = "0.16"
 ignore = "0.4.17"
 linked-hash-map = { version = "0.5.4", features = ["serde_impl"] }
 log = "0.4"
